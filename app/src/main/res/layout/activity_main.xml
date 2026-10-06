@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <LinearLayout
+        android:id="@+id/mainContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- HEADER TITLE -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lockscreen Calendar"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="normal"
+            android:gravity="center"
+            android:layout_marginTop="32dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Swipe ← to choose a calendar style"
+            android:textColor="#888888"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- MAIN CARD -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="#1C1C1E"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="24dp">
+
+                <!-- Title & Update Button -->
+                <TextView
+                    android:id="@+id/tvStyleName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Month agenda"
+                    android:textColor="#FFFFFF"
+                    android:textSize="24sp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="false" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnUpdateWallpaper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Update"
+                    android:textColor="#2196F3"
+                    app:backgroundTint="#000000"
+                    app:strokeColor="#2196F3"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignTop="@id/tvStyleName"
+                    android:layout_alignBottom="@id/tvStyleName"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp" />
+
+                <!-- Frame preview picture -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/tvStyleName"
+                    android:layout_marginTop="24dp"
+                    android:background="#000000">
+
+                    <ImageView
+                        android:id="@+id/ivPreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop" />
+
+                    <!-- Floating Customize Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCustomize"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Customize"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="24dp"
+                        app:cornerRadius="24dp"
+                        app:backgroundTint="#000000"
+                        app:strokeColor="#2196F3"
+                        app:strokeWidth="2dp"
+                        android:textColor="#2196F3"
+                        android:textSize="18sp"
+                        android:textStyle="normal"
+                        android:paddingHorizontal="32dp"
+                        android:paddingVertical="12dp" />
+                </FrameLayout>
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+    <!-- Bottom Sheet -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        app:behavior_peekHeight="0dp"
+        app:behavior_hideable="true"
+        app:cardBackgroundColor="#121212"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="24dp">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="48dp"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <!-- Handle bar -->
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="4dp"
+                    android:background="#555555"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="24dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Customize Wallpaper"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="24dp" />
+
+                <!-- CARD 1: Day Colors -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="#1C1C1E"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Day colors"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:textColor="#EEEEEE"
+                            android:layout_marginBottom="16dp"/>
+
+                        <!-- Past Day -->
+                        <LinearLayout android:id="@+id/rowColorPast" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
+                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Past day" android:textColor="#CCCCCC" android:textSize="16sp"/>
+                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorPast" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#555555" app:strokeWidth="1dp" app:strokeColor="#444"/>
+                        </LinearLayout>
+
+                        <!-- Future Day -->
+                        <LinearLayout android:id="@+id/rowColorFuture" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
+                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Future day" android:textColor="#CCCCCC" android:textSize="16sp"/>
+                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorFuture" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#AAAAAA" app:strokeWidth="1dp" app:strokeColor="#444"/>
+                        </LinearLayout>
+
+                        <!-- Today -->
+                        <LinearLayout android:id="@+id/rowColorToday" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
+                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Today" android:textColor="#CCCCCC" android:textSize="16sp"/>
+                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorToday" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#4CAF50" app:strokeWidth="1dp" app:strokeColor="#444"/>
+                        </LinearLayout>
+
+                        <!-- Text & numbers -->
+                        <LinearLayout android:id="@+id/rowColorText" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
+                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Text &amp; numbers" android:textColor="#CCCCCC" android:textSize="16sp"/>
+                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorText" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#FFFFFF" app:strokeWidth="1dp" app:strokeColor="#444"/>
+                        </LinearLayout>
+
+                        <!-- Background -->
+                        <LinearLayout android:id="@+id/rowColorBg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
+                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Calendar background" android:textColor="#CCCCCC" android:textSize="16sp"/>
+                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorBg" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#000000" app:strokeWidth="1dp" app:strokeColor="#444"/>
+                        </LinearLayout>
+
+                        <!-- Pick Image -->
+                        <LinearLayout android:id="@+id/btnPickImage" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
+                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Use Custom Background Image" android:textColor="#2196F3" android:textSize="16sp" android:textStyle="bold"/>
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_gallery" app:tint="#2196F3"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- CARD 2: Font Style -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="#1C1C1E"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Font" android:textStyle="bold" android:textSize="18sp" android:textColor="#EEEEEE" android:layout_marginBottom="16dp"/>
+                        <com.google.android.material.button.MaterialButtonToggleGroup
+                            android:id="@+id/toggleFont"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:singleSelection="true"
+                            app:selectionRequired="true"
+                            app:checkedButton="@+id/btnFontSans">
+                            <Button android:id="@+id/btnFontSans" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="System" style="?attr/materialButtonOutlinedStyle" android:textColor="#FFF"/>
+                            <Button android:id="@+id/btnFontSerif" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Serif" style="?attr/materialButtonOutlinedStyle" android:textColor="#FFF"/>
+                            <Button android:id="@+id/btnFontMono" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Mono" style="?attr/materialButtonOutlinedStyle" android:textColor="#FFF"/>
+                        </com.google.android.material.button.MaterialButtonToggleGroup>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- CARD 3: Calendar Colors -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="#1C1C1E"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Calendar Colors" android:textStyle="bold" android:textSize="18sp" android:textColor="#EEEEEE" android:layout_marginBottom="8dp"/>
+
+                        <TextView android:id="@+id/btnRefreshCalendars" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="↻ Refresh calendars" android:textColor="#2196F3" android:textSize="16sp" android:layout_marginBottom="16dp" android:clickable="true" android:focusable="true"/>
+
+                        <!-- Dynamic Calendar List Container -->
+                        <LinearLayout android:id="@+id/llCalendarsContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- CARD 4: Layout & Adjustments -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardBackgroundColor="#1C1C1E"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Event Chips &amp; Layout" android:textStyle="bold" android:textSize="18sp" android:textColor="#EEEEEE" android:layout_marginBottom="16dp"/>
+
+                        <!-- Switches -->
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchMinimalist"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Minimalist Events (Dots only)"
+                            app:showText="false"
+                            android:textColor="#CCCCCC"
+                            android:layout_marginBottom="12dp"
+                            android:checked="false"/>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchMondayFirst"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Start week on Monday"
+                            app:showText="false"
+                            android:textColor="#CCCCCC"
+                            android:layout_marginBottom="12dp"
+                            android:checked="true"/>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchWeekNumbers"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Show week numbers"
+                            app:showText="false"
+                            android:textColor="#CCCCCC"
+                            android:layout_marginBottom="16dp"
+                            android:checked="false"/>
+
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginBottom="16dp" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Layout Mode" android:textColor="#CCCCCC" />
+                        <RadioGroup
+                            android:id="@+id/rgLayoutStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginBottom="16dp">
+                            <RadioButton android:id="@+id/rbStandard" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Month Agenda" android:textColor="#FFFFFF" android:checked="true"/>
+                            <RadioButton android:id="@+id/rbSplit" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Month (Split clock hole)" android:textColor="#FFFFFF"/>
+                            <RadioButton android:id="@+id/rbWeekly" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Weekly + Today's Tasks" android:textColor="#FFFFFF"/>
+                        </RadioGroup>
+
+                        <!-- Sliders -->
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Vertical Position (Y Offset)" android:textColor="#CCCCCC" />
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/seekYOffset"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="0.0"
+                            android:valueTo="80.0"
+                            android:value="60.0"
+                            app:thumbColor="#2196F3"
+                            app:trackColorActive="#2196F3"
+                            app:trackColorInactive="#333333"
+                            android:layout_marginBottom="8dp"/>
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Calendar Size Scale" android:textColor="#CCCCCC" />
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/seekScale"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="50.0"
+                            android:valueTo="200.0"
+                            android:value="100.0"
+                            app:thumbColor="#2196F3"
+                            app:trackColorActive="#2196F3"
+                            app:trackColorInactive="#333333"
+                            android:layout_marginBottom="8dp"/>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSetWallpaper"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:text="Save Configuration"
+                    android:textColor="#FFFFFF"
+                    app:backgroundTint="#2196F3"
+                    app:cornerRadius="16dp"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:layout_marginBottom="16dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnReset"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:text="Reset to default"
+                    android:textColor="#FF8A80"
+                    app:backgroundTint="#1C1C1E"
+                    app:cornerRadius="16dp"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="16dp"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </com.google.android.material.card.MaterialCardView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
