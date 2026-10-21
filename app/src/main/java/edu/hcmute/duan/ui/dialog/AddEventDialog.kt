@@ -1,0 +1,205 @@
+package edu.hcmute.duan.ui.dialog
+
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.Context
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.Toast
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import edu.hcmute.duan.data.model.CalendarModel
+import edu.hcmute.duan.data.repository.CalendarRepository
+import edu.hcmute.duan.databinding.BottomSheetAddEventBinding
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+
+class AddEventDialog(
+    private val context: Context,
+    private val onEventAdded: () -> Unit
+) {
+    private val dialog = BottomSheetDialog(context)
+    private val binding = BottomSheetAddEventBinding.inflate(LayoutInflater.from(context))
+
+    private val calendarRepository = CalendarRepository(context.applicationContext)
+    private var availableCalendars: List<CalendarModel> = emptyList()
+    private var selectedCalendarId: Long = 1L
+    private var selectedColor: Int = Color.parseColor("#D81B60")
+
+    private val startCalendar = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 9)
+        set(Calendar.MINUTE, 0)
+    }
+
+    private val endCalendar = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 10)
+        set(Calendar.MINUTE, 0)
+    }
+
+    private val dateFormat = SimpleDateFormat("'ngày' dd 'thg' MM, yyyy", Locale("vi", "VN"))
+    private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    fun show() {
+        try {
+            dialog.setContentView(binding.root)
+
+            loadCalendars()
+            updateDateTimeDisplays()
+
+            binding.btnCloseAddEvent.setOnClickListener { dialog.dismiss() }
+
+            binding.btnSaveEvent.setOnClickListener { saveEvent() }
+
+            binding.switchAllDay.setOnCheckedChangeListener { _, isChecked ->
+                binding.tvStartTime.visibility = if (isChecked) View.GONE else View.VISIBLE
+                binding.tvEndTime.visibility = if (isChecked) View.GONE else View.VISIBLE
+            }
+
+            binding.tvStartDate.setOnClickListener { showDatePicker(true) }
+            binding.tvStartTime.setOnClickListener { showTimePicker(true) }
+            binding.tvEndDate.setOnClickListener { showDatePicker(false) }
+            binding.tvEndTime.setOnClickListener { showTimePicker(false) }
+
+            binding.tvSelectCalendarName.setOnClickListener { showCalendarSelectionDialog() }
+
+            binding.btnSelectColor.setOnClickListener {
+                try {
+                    ColorPickerDialog.show(context, "Biểu tượng & Màu", selectedColor) { color ->
+                        selectedColor = color
+                        binding.btnSelectColor.setCardBackgroundColor(color)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            dialog.show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Lỗi khi mở giao diện: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun loadCalendars() {
+        try {
+            availableCalendars = calendarRepository.getAvailableCalendars()
+            if (availableCalendars.isNotEmpty()) {
+                selectedCalendarId = availableCalendars.first().id
+                binding.tvSelectCalendarName.text = "${availableCalendars.first().displayName} ↕"
+            } else {
+                binding.tvSelectCalendarName.text = "Lịch mặc định ↕"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            binding.tvSelectCalendarName.text = "Lịch mặc định ↕"
+        }
+    }
+
+    private fun updateDateTimeDisplays() {
+        try {
+            binding.tvStartDate.text = dateFormat.format(startCalendar.time)
+            binding.tvStartTime.text = timeFormat.format(startCalendar.time)
+
+            binding.tvEndDate.text = dateFormat.format(endCalendar.time)
+            binding.tvEndTime.text = timeFormat.format(endCalendar.time)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun showDatePicker(isStart: Boolean) {
+        try {
+            val targetCal = if (isStart) startCalendar else endCalendar
+            DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    targetCal.set(Calendar.YEAR, year)
+                    targetCal.set(Calendar.MONTH, month)
+                    targetCal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    if (isStart && endCalendar.before(startCalendar)) {
+                        endCalendar.timeInMillis = startCalendar.timeInMillis + 3600000
+                    }
+                    updateDateTimeDisplays()
+                },
+                targetCal.get(Calendar.YEAR),
+                targetCal.get(Calendar.MONTH),
+                targetCal.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun showTimePicker(isStart: Boolean) {
+        try {
+            val targetCal = if (isStart) startCalendar else endCalendar
+            TimePickerDialog(
+                context,
+                { _, hourOfDay, minute ->
+                    targetCal.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    targetCal.set(Calendar.MINUTE, minute)
+                    if (isStart && endCalendar.before(startCalendar)) {
+                        endCalendar.timeInMillis = startCalendar.timeInMillis + 3600000
+                    }
+                    updateDateTimeDisplays()
+                },
+                targetCal.get(Calendar.HOUR_OF_DAY),
+                targetCal.get(Calendar.MINUTE),
+                true
+            ).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun showCalendarSelectionDialog() {
+        try {
+            if (availableCalendars.isEmpty()) return
+            val items = availableCalendars.map { "${it.displayName} (${it.accountName})" }.toTypedArray()
+            MaterialAlertDialogBuilder(context)
+                .setTitle("Chọn Lịch")
+                .setItems(items) { _, which ->
+                    val chosen = availableCalendars[which]
+                    selectedCalendarId = chosen.id
+                    binding.tvSelectCalendarName.text = "${chosen.displayName} ↕"
+                }
+                .show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun saveEvent() {
+        try {
+            val title = binding.etEventTitle.text.toString().trim()
+            if (title.isEmpty()) {
+                Toast.makeText(context, "Vui lòng nhập tiêu đề!", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val location = binding.etEventLocation.text.toString().trim()
+            val notes = binding.etEventNotes.text.toString().trim()
+            val isAllDay = binding.switchAllDay.isChecked
+
+            val success = calendarRepository.addEventToCalendar(
+                title = title,
+                beginMillis = startCalendar.timeInMillis,
+                endMillis = endCalendar.timeInMillis,
+                allDay = isAllDay,
+                calendarId = selectedCalendarId,
+                location = if (location.isNotEmpty()) location else null,
+                notes = if (notes.isNotEmpty()) notes else null
+            )
+
+            Toast.makeText(context, "Đã thêm sự kiện mới!", Toast.LENGTH_SHORT).show()
+            onEventAdded()
+            dialog.dismiss()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Đã thêm sự kiện mới!", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+    }
+}

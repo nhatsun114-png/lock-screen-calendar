@@ -6,21 +6,13 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
+import edu.hcmute.duan.data.model.EventModel
+import edu.hcmute.duan.data.model.WallpaperTheme
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.Locale
-
-data class WallpaperTheme(
-    val width: Int, val height: Int,
-    val layoutStyle: Int, val fontStyle: Int,
-    val isMondayFirst: Boolean, val showWeekNumbers: Boolean, val isMinimalist: Boolean,
-    val yOffsetPercent: Int, val sizeScalePercent: Int,
-    val colorBg: Int, val colorText: Int, val colorToday: Int, val colorPast: Int, val colorFuture: Int,
-    val bgImage: Bitmap?,
-    val customCalColors: Map<Long, Int>
-)
 
 object CalendarWallpaperRenderer {
 

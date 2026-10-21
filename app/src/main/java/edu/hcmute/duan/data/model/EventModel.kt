@@ -1,4 +1,4 @@
-package edu.hcmute.duan
+package edu.hcmute.duan.data.model
 
 data class EventModel(
     val title: String,

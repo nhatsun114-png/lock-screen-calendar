@@ -9,6 +9,7 @@ import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import edu.hcmute.duan.data.model.WallpaperTheme
 import java.io.File
 
 class CalendarUpdateWorker(
@@ -19,14 +20,14 @@ class CalendarUpdateWorker(
     override suspend fun doWork(): Result {
         try {
             val sharedPrefs = context.getSharedPreferences("CalendarPrefs", Context.MODE_PRIVATE)
-            
+
             // Read configurations
             val colorBg = sharedPrefs.getInt("colorBg", Color.BLACK)
             val colorText = sharedPrefs.getInt("colorText", Color.WHITE)
             val colorToday = sharedPrefs.getInt("colorToday", Color.parseColor("#4CAF50"))
             val colorPast = sharedPrefs.getInt("colorPast", Color.parseColor("#555555"))
             val colorFuture = sharedPrefs.getInt("colorFuture", Color.parseColor("#AAAAAA"))
-            
+
             val yOffset = sharedPrefs.getFloat("yOffset", 60f).toInt()
             val scale = sharedPrefs.getFloat("scale", 100f).toInt()
             val isMondayFirst = sharedPrefs.getBoolean("mondayFirst", true)
@@ -35,11 +36,11 @@ class CalendarUpdateWorker(
             val fontStyle = sharedPrefs.getInt("fontStyle", 0)
             val isMinimalist = sharedPrefs.getBoolean("minimalistEvents", false)
             val isUsingImage = sharedPrefs.getBoolean("isUsingImage", false)
-            
+
             val calendars = CalendarHelper.getAvailableCalendars(context)
             val selectedCals = mutableSetOf<String>()
             val customCalColors = mutableMapOf<Long, Int>()
-            
+
             for (cal in calendars) {
                 if (sharedPrefs.getBoolean("cal_enabled_${cal.id}", true)) {
                     selectedCals.add(cal.id.toString())
