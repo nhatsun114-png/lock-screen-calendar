@@ -48,10 +48,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
+    private val calendarRepository by lazy { CalendarRepository(applicationContext) }
+
     private val viewModel: MainViewModel by lazy {
         val factory = MainViewModelFactory(
             SettingsRepository(applicationContext),
-            CalendarRepository(applicationContext),
+            calendarRepository,
             WallpaperRepository(applicationContext)
         )
         ViewModelProvider(this, factory)[MainViewModel::class.java]
@@ -163,7 +165,8 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("Lưu") { dialog, _ ->
                     val habitName = input.text.toString().trim()
                     if (habitName.isNotEmpty()) {
-                        Toast.makeText(this, "Đã tạo thói quen mới: $habitName", Toast.LENGTH_SHORT).show()
+                        addNewHabitCard(habitName)
+                        Toast.makeText(this, "Đã tạo thói quen mới: $habitName! 🎉", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this, "Vui lòng nhập tên thói quen!", Toast.LENGTH_SHORT).show()
                     }
@@ -197,6 +200,14 @@ class MainActivity : AppCompatActivity() {
             binding.tvHabit2FlameBadge.visibility = View.GONE
             binding.tvHabit1Streak.text = "0d"
             binding.tvHabit2Streak.text = "0d"
+
+            for (group in customHabitCardViews) {
+                group.weekRow.visibility = View.VISIBLE
+                group.yearRow.visibility = View.GONE
+                group.checkBtn.visibility = View.VISIBLE
+                group.flameBadge.visibility = View.GONE
+                group.streakTv.text = "0d"
+            }
         }
 
         binding.btnTabYear.setOnClickListener {
@@ -219,6 +230,14 @@ class MainActivity : AppCompatActivity() {
             binding.tvHabit2FlameBadge.visibility = View.VISIBLE
             binding.tvHabit1Streak.text = "0d · 17:29"
             binding.tvHabit2Streak.text = "0d · 17:29"
+
+            for (group in customHabitCardViews) {
+                group.weekRow.visibility = View.GONE
+                group.yearRow.visibility = View.VISIBLE
+                group.checkBtn.visibility = View.GONE
+                group.flameBadge.visibility = View.VISIBLE
+                group.streakTv.text = "0d · 17:29"
+            }
         }
 
         var isHabit1Completed = false
@@ -392,6 +411,16 @@ class MainActivity : AppCompatActivity() {
         populateGrid(binding.gridHeatmap2, Color.parseColor("#0288D1"), Color.parseColor("#B3E5FC"))
     }
 
+    data class CustomHabitViewGroup(
+        val weekRow: View,
+        val yearRow: View,
+        val checkBtn: View,
+        val flameBadge: View,
+        val streakTv: TextView
+    )
+
+    private val customHabitCardViews = mutableListOf<CustomHabitViewGroup>()
+
     private fun setupInitialDefaultData() {
         // Default Eisenhower Reminders Data
         binding.tvQ1Content.text = "• Nộp báo cáo đồ án Android\n• Gửi email cho giảng viên"
@@ -402,6 +431,287 @@ class MainActivity : AppCompatActivity() {
         // Default Habit Streaks
         binding.tvHabit1Streak.text = "3d"
         binding.tvHabit2Streak.text = "5d"
+    }
+
+    private fun addNewHabitCard(habitName: String) {
+        val dp = resources.displayMetrics.density
+
+        val card = MaterialCardView(this).apply {
+            radius = 20f * dp
+            setCardBackgroundColor(Color.parseColor("#FFF3E0"))
+            strokeWidth = 0
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins((16 * dp).toInt(), 0, (16 * dp).toInt(), (16 * dp).toInt())
+            }
+            layoutParams = params
+        }
+
+        val outerLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding((16 * dp).toInt(), (16 * dp).toInt(), (16 * dp).toInt(), (16 * dp).toInt())
+        }
+
+        val topRow = RelativeLayout(this)
+
+        val iconTv = TextView(this).apply {
+            id = View.generateViewId()
+            text = "⭐"
+            textSize = 20f
+            gravity = Gravity.CENTER
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                setColor(Color.parseColor("#FFE0B2"))
+                cornerRadius = 10f * dp
+            }
+            val params = RelativeLayout.LayoutParams((40 * dp).toInt(), (40 * dp).toInt()).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_START)
+                addRule(RelativeLayout.CENTER_VERTICAL)
+            }
+            layoutParams = params
+        }
+
+        val textLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val params = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.RIGHT_OF, iconTv.id)
+                addRule(RelativeLayout.CENTER_VERTICAL)
+                marginStart = (12 * dp).toInt()
+            }
+            layoutParams = params
+        }
+
+        val titleTv = TextView(this).apply {
+            text = habitName
+            setTextColor(Color.BLACK)
+            textSize = 18f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+
+        val streakTv = TextView(this).apply {
+            text = "0d"
+            setTextColor(Color.parseColor("#888888"))
+            textSize = 13f
+        }
+
+        textLayout.addView(titleTv)
+        textLayout.addView(streakTv)
+
+        var isDone = false
+        val checkBtn = TextView(this).apply {
+            id = View.generateViewId()
+            text = "✓"
+            textSize = 22f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            gravity = Gravity.CENTER
+            setTextColor(Color.parseColor("#E65100"))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                setColor(Color.parseColor("#FFE0B2"))
+                cornerRadius = 10f * dp
+            }
+            val params = RelativeLayout.LayoutParams((44 * dp).toInt(), (44 * dp).toInt()).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_END)
+                addRule(RelativeLayout.CENTER_VERTICAL)
+            }
+            layoutParams = params
+            isClickable = true
+            isFocusable = true
+        }
+
+        val flameBadge = TextView(this).apply {
+            text = "1 🔥"
+            setTextColor(Color.parseColor("#E65100"))
+            textSize = 14f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                setColor(Color.parseColor("#FFE0B2"))
+                cornerRadius = 8f * dp
+            }
+            setPadding((10 * dp).toInt(), (4 * dp).toInt(), (10 * dp).toInt(), (4 * dp).toInt())
+            val params = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_END)
+                addRule(RelativeLayout.CENTER_VERTICAL)
+            }
+            layoutParams = params
+            visibility = View.GONE
+        }
+
+        topRow.addView(iconTv)
+        topRow.addView(textLayout)
+        topRow.addView(checkBtn)
+        topRow.addView(flameBadge)
+
+        // 1. WEEK VIEW ROW
+        val weekRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = (16 * dp).toInt()
+            }
+            layoutParams = params
+        }
+
+        val dayNames = arrayOf("T2 19", "T3 20", "T4 21", "T5 22", "T6 23", "T7 24", "CN 25")
+        val dayViews = mutableListOf<TextView>()
+
+        for (i in 0..6) {
+            val dayTv = TextView(this).apply {
+                text = dayNames[i]
+                textSize = 10f
+                gravity = Gravity.CENTER
+                val isToday = (i == 2)
+                setTextColor(if (isToday) Color.BLACK else Color.parseColor("#888888"))
+                if (isToday) typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+
+                background = if (isToday) {
+                    ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_habit_dashed_day)
+                } else {
+                    android.graphics.drawable.GradientDrawable().apply {
+                        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                        setColor(Color.parseColor("#FFE0B2"))
+                        cornerRadius = 4f * dp
+                    }
+                }
+
+                val params = LinearLayout.LayoutParams(0, (36 * dp).toInt(), 1f).apply {
+                    if (i < 6) marginEnd = (4 * dp).toInt()
+                }
+                layoutParams = params
+            }
+            dayViews.add(dayTv)
+            weekRow.addView(dayTv)
+        }
+
+        checkBtn.setOnClickListener {
+            isDone = !isDone
+            if (isDone) {
+                streakTv.text = "1d"
+                checkBtn.setBackgroundColor(Color.parseColor("#FF9800"))
+                checkBtn.setTextColor(Color.WHITE)
+
+                dayViews[2].background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    setColor(Color.parseColor("#FF9800"))
+                    cornerRadius = 4f * dp
+                }
+                dayViews[2].setTextColor(Color.WHITE)
+
+                Toast.makeText(this@MainActivity, "Đã hoàn thành: $habitName! 🎉", Toast.LENGTH_SHORT).show()
+            } else {
+                streakTv.text = "0d"
+                checkBtn.setBackgroundColor(Color.parseColor("#FFE0B2"))
+                checkBtn.setTextColor(Color.parseColor("#E65100"))
+
+                dayViews[2].background = ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_habit_dashed_day)
+                dayViews[2].setTextColor(Color.BLACK)
+            }
+        }
+
+        // 2. YEAR VIEW HEATMAP CONTAINER
+        val yearRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            visibility = View.GONE
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = (16 * dp).toInt()
+            }
+            layoutParams = params
+        }
+
+        val mwfLabels = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val params = LinearLayout.LayoutParams((16 * dp).toInt(), (64 * dp).toInt()).apply {
+                marginEnd = (6 * dp).toInt()
+            }
+            layoutParams = params
+
+            val mLbl = TextView(this@MainActivity).apply {
+                text = "M"
+                setTextColor(Color.parseColor("#888888"))
+                textSize = 10f
+                gravity = Gravity.CENTER
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1f)
+            }
+            val wLbl = TextView(this@MainActivity).apply {
+                text = "W"
+                setTextColor(Color.parseColor("#888888"))
+                textSize = 10f
+                gravity = Gravity.CENTER
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1f)
+            }
+            val fLbl = TextView(this@MainActivity).apply {
+                text = "F"
+                setTextColor(Color.parseColor("#888888"))
+                textSize = 10f
+                gravity = Gravity.CENTER
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1f)
+            }
+            addView(mLbl)
+            addView(wLbl)
+            addView(fLbl)
+        }
+
+        val heatmapGrid = android.widget.GridLayout(this).apply {
+            rowCount = 7
+            columnCount = 24
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        fun populateCustomGrid() {
+            heatmapGrid.removeAllViews()
+            fun createDotDrawable(color: Int) = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                setColor(color)
+                cornerRadius = 2.5f * dp
+            }
+
+            for (row in 0..6) {
+                for (col in 0..23) {
+                    val dot = View(this).apply {
+                        val params = android.widget.GridLayout.LayoutParams().apply {
+                            width = (9 * dp).toInt()
+                            height = (9 * dp).toInt()
+                            setMargins((1.5f * dp).toInt(), (1.5f * dp).toInt(), (1.5f * dp).toInt(), (1.5f * dp).toInt())
+                        }
+                        layoutParams = params
+                        val isCompleted = (col == 23 && row == 2 && isDone)
+                        background = createDotDrawable(if (isCompleted) Color.parseColor("#FF9800") else Color.parseColor("#FFE0B2"))
+                    }
+                    heatmapGrid.addView(dot)
+                }
+            }
+        }
+        populateCustomGrid()
+
+        yearRow.addView(mwfLabels)
+        yearRow.addView(heatmapGrid)
+
+        outerLayout.addView(topRow)
+        outerLayout.addView(weekRow)
+        outerLayout.addView(yearRow)
+        card.addView(outerLayout)
+
+        customHabitCardViews.add(CustomHabitViewGroup(weekRow, yearRow, checkBtn, flameBadge, streakTv))
+
+        binding.llCustomHabitsContainer.addView(card)
     }
 
     private fun openAddEventBottomSheet() {
@@ -753,6 +1063,14 @@ class MainActivity : AppCompatActivity() {
             container.addView(titleTv)
             container.addView(timeTv)
             card.addView(container)
+
+            card.isClickable = true
+            card.isFocusable = true
+            card.setOnClickListener {
+                AddEventDialog(this, event) {
+                    viewModel.refreshCalendarsAndEvents()
+                }.show()
+            }
 
             val targetSlot = slots[startHour]
             if (targetSlot != null) {

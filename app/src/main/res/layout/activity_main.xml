@@ -1335,6 +1335,13 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
+                    <!-- DYNAMIC CUSTOM HABITS CONTAINER -->
+                    <LinearLayout
+                        android:id="@+id/llCustomHabitsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"/>
+
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
 

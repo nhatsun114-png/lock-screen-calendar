@@ -10,6 +10,7 @@ import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import edu.hcmute.duan.data.model.CalendarModel
+import edu.hcmute.duan.data.model.EventModel
 import edu.hcmute.duan.data.repository.CalendarRepository
 import edu.hcmute.duan.databinding.BottomSheetAddEventBinding
 import java.text.SimpleDateFormat
@@ -18,6 +19,7 @@ import java.util.Locale
 
 class AddEventDialog(
     private val context: Context,
+    private val eventToEdit: EventModel? = null,
     private val onEventAdded: () -> Unit
 ) {
     private val dialog = BottomSheetDialog(context)
@@ -46,6 +48,7 @@ class AddEventDialog(
             dialog.setContentView(binding.root)
 
             loadCalendars()
+            prefillEventToEdit()
             updateDateTimeDisplays()
 
             binding.btnCloseAddEvent.setOnClickListener { dialog.dismiss() }
@@ -81,6 +84,25 @@ class AddEventDialog(
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(context, "Lỗi khi mở giao diện: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun prefillEventToEdit() {
+        if (eventToEdit == null) return
+        try {
+            binding.etEventTitle.setText(eventToEdit.title)
+            startCalendar.timeInMillis = eventToEdit.begin
+            endCalendar.timeInMillis = eventToEdit.end
+
+            binding.switchAllDay.isChecked = eventToEdit.allDay
+            binding.tvStartTime.visibility = if (eventToEdit.allDay) View.GONE else View.VISIBLE
+            binding.tvEndTime.visibility = if (eventToEdit.allDay) View.GONE else View.VISIBLE
+
+            selectedColor = eventToEdit.color
+            binding.btnSelectColor.setCardBackgroundColor(selectedColor)
+            selectedCalendarId = eventToEdit.calendarId
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -230,6 +252,11 @@ class AddEventDialog(
             val notes = binding.etEventNotes.text.toString().trim()
             val isAllDay = binding.switchAllDay.isChecked
 
+            // If editing an existing event, remove the old instance
+            if (eventToEdit != null) {
+                calendarRepository.deleteLocalEvent(eventToEdit.title, eventToEdit.begin)
+            }
+
             val success = calendarRepository.addEventToCalendar(
                 title = title,
                 beginMillis = startCalendar.timeInMillis,
@@ -268,12 +295,13 @@ class AddEventDialog(
                 e.printStackTrace()
             }
 
-            Toast.makeText(context, "Đã thêm sự kiện & đặt báo thức nhắc hẹn!", Toast.LENGTH_SHORT).show()
+            val toastMsg = if (eventToEdit != null) "Đã cập nhật sự kiện!" else "Đã thêm sự kiện mới & đặt báo thức!"
+            Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show()
             onEventAdded()
             dialog.dismiss()
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "Đã thêm sự kiện mới!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Đã lưu sự kiện!", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }
     }

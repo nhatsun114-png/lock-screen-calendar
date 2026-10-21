@@ -110,6 +110,58 @@ class CalendarRepository(private val context: Context) {
         }
     }
 
+    fun deleteLocalEvent(eventTitle: String, eventBegin: Long) {
+        try {
+            val existing = loadLocalEvents().toMutableList()
+            existing.removeAll { it.title == eventTitle && it.begin == eventBegin }
+
+            val prefs = context.getSharedPreferences("local_user_events_prefs", Context.MODE_PRIVATE)
+            val jsonArray = JSONArray()
+            for (evt in existing) {
+                val obj = JSONObject().apply {
+                    put("title", evt.title)
+                    put("begin", evt.begin)
+                    put("end", evt.end)
+                    put("allDay", evt.allDay)
+                    put("color", evt.color)
+                    put("calendarId", evt.calendarId)
+                }
+                jsonArray.put(obj)
+            }
+            prefs.edit().putString("local_events_json", jsonArray.toString()).apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun updateLocalEvent(oldTitle: String, oldBegin: Long, newTitle: String) {
+        try {
+            val existing = loadLocalEvents().toMutableList()
+            val index = existing.indexOfFirst { it.title == oldTitle && it.begin == oldBegin }
+            if (index != -1) {
+                val old = existing[index]
+                existing[index] = old.copy(title = newTitle)
+            }
+
+            val prefs = context.getSharedPreferences("local_user_events_prefs", Context.MODE_PRIVATE)
+            val jsonArray = JSONArray()
+            for (evt in existing) {
+                val obj = JSONObject().apply {
+                    put("title", evt.title)
+                    put("begin", evt.begin)
+                    put("end", evt.end)
+                    put("allDay", evt.allDay)
+                    put("color", evt.color)
+                    put("calendarId", evt.calendarId)
+                }
+                jsonArray.put(obj)
+            }
+            prefs.edit().putString("local_events_json", jsonArray.toString()).apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun loadLocalEvents(): List<EventModel> {
         val list = mutableListOf<EventModel>()
         try {
