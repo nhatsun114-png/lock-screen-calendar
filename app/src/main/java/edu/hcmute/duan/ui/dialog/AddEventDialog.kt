@@ -14,11 +14,13 @@ import edu.hcmute.duan.data.model.EventModel
 import edu.hcmute.duan.data.repository.CalendarRepository
 import edu.hcmute.duan.databinding.BottomSheetAddEventBinding
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Calendar
 import java.util.Locale
 
 class AddEventDialog(
     private val context: Context,
+    private val initialDate: LocalDate? = null,
     private val eventToEdit: EventModel? = null,
     private val onEventAdded: () -> Unit
 ) {
@@ -31,11 +33,21 @@ class AddEventDialog(
     private var selectedColor: Int = Color.parseColor("#D81B60")
 
     private val startCalendar = Calendar.getInstance().apply {
+        if (initialDate != null) {
+            set(Calendar.YEAR, initialDate.year)
+            set(Calendar.MONTH, initialDate.monthValue - 1)
+            set(Calendar.DAY_OF_MONTH, initialDate.dayOfMonth)
+        }
         set(Calendar.HOUR_OF_DAY, 9)
         set(Calendar.MINUTE, 0)
     }
 
     private val endCalendar = Calendar.getInstance().apply {
+        if (initialDate != null) {
+            set(Calendar.YEAR, initialDate.year)
+            set(Calendar.MONTH, initialDate.monthValue - 1)
+            set(Calendar.DAY_OF_MONTH, initialDate.dayOfMonth)
+        }
         set(Calendar.HOUR_OF_DAY, 10)
         set(Calendar.MINUTE, 0)
     }
@@ -248,9 +260,14 @@ class AddEventDialog(
                 return
             }
 
+            val isAllDay = binding.switchAllDay.isChecked
+            if (!isAllDay && endCalendar.timeInMillis <= startCalendar.timeInMillis) {
+                Toast.makeText(context, "Giờ kết thúc không thể sớm hơn hoặc bằng giờ bắt đầu!", Toast.LENGTH_LONG).show()
+                return
+            }
+
             val location = binding.etEventLocation.text.toString().trim()
             val notes = binding.etEventNotes.text.toString().trim()
-            val isAllDay = binding.switchAllDay.isChecked
 
             // If editing an existing event, remove the old instance
             if (eventToEdit != null) {
@@ -295,13 +312,15 @@ class AddEventDialog(
                 e.printStackTrace()
             }
 
-            val toastMsg = if (eventToEdit != null) "Đã cập nhật sự kiện!" else "Đã thêm sự kiện mới & đặt báo thức!"
+            val toastMsg = if (eventToEdit != null) "Đã cập nhật sự kiện!" else "Đã thêm sự kiện mới!"
             Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show()
+            
             onEventAdded()
             dialog.dismiss()
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(context, "Đã lưu sự kiện!", Toast.LENGTH_SHORT).show()
+            onEventAdded()
             dialog.dismiss()
         }
     }

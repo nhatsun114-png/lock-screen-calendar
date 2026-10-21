@@ -10,6 +10,7 @@ import android.view.WindowManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import edu.hcmute.duan.data.model.WallpaperTheme
+import edu.hcmute.duan.data.repository.CalendarRepository
 import java.io.File
 
 class CalendarUpdateWorker(
@@ -37,7 +38,8 @@ class CalendarUpdateWorker(
             val isMinimalist = sharedPrefs.getBoolean("minimalistEvents", false)
             val isUsingImage = sharedPrefs.getBoolean("isUsingImage", false)
 
-            val calendars = CalendarHelper.getAvailableCalendars(context)
+            val calendarRepo = CalendarRepository(context)
+            val calendars = calendarRepo.getAvailableCalendars()
             val selectedCals = mutableSetOf<String>()
             val customCalColors = mutableMapOf<Long, Int>()
 
@@ -48,8 +50,8 @@ class CalendarUpdateWorker(
                 }
             }
 
-            // Fetch latest events
-            val events = CalendarHelper.getEventsForCurrentMonth(context, selectedCals)
+            // Fetch latest events (includes system events AND local events from Room DB)
+            val events = calendarRepo.getEventsForCurrentMonth(selectedCals)
 
             // Load Custom Image
             var bgBitmap: Bitmap? = null

@@ -1,0 +1,95 @@
+<resources>
+    <string name="app_name">Lock Screen Calendar</string>
+
+    <string name="tab_wallpaper">Wallpaper</string>
+    <string name="tab_calendar">Calendar</string>
+    <string name="tab_reminders">Reminders</string>
+    <string name="tab_habits">Habits</string>
+    <string name="tab_settings">Settings</string>
+
+    <string name="btn_customize_wallpaper">⚙️ CUSTOMIZE LOCKSCREEN</string>
+    <string name="btn_update_wallpaper">✔ UPDATE</string>
+    <string name="btn_apply_wallpaper">✓ Apply Lock Screen Wallpaper</string>
+    <string name="btn_pick_custom_bg">🖼️ Pick Custom Image from Gallery</string>
+    <string name="title_customize_wallpaper">Customize Lock Screen Wallpaper</string>
+
+    <string name="title_layout_style">Layout Style</string>
+    <string name="layout_standard">Month agenda (Standard Month)</string>
+    <string name="layout_split">Split clock hole (Split Clock)</string>
+    <string name="layout_weekly">Weekly tasks (Weekly Tasks)</string>
+
+    <string name="title_calendar_colors">Calendar Colors</string>
+    <string name="color_past_day">Past Days Color</string>
+    <string name="color_future_day">Future Days Color</string>
+    <string name="color_today">Today Highlight Color</string>
+    <string name="color_text_numbers">Text &amp; Numbers Color</string>
+    <string name="color_bg">Calendar Background Color</string>
+
+    <string name="title_font_style">Font Style</string>
+    <string name="font_system">System</string>
+    <string name="font_serif">Serif</string>
+    <string name="font_mono">Mono</string>
+
+    <string name="title_position_size">Position &amp; Size</string>
+    <string name="label_y_offset">Vertical Position (Y-Offset)</string>
+    <string name="label_scale">Calendar Size Scale</string>
+
+    <string name="switch_monday_first">Start week on Monday</string>
+    <string name="switch_week_numbers">Show week numbers</string>
+    <string name="switch_minimalist">Minimalist event dots</string>
+
+    <string name="title_settings">System Settings</string>
+    <string name="title_theme_mode">Theme Mode</string>
+    <string name="theme_light">☀️ Light Mode</string>
+    <string name="theme_dark">🌙 Dark Mode</string>
+    <string name="theme_system">⚙️ System Default</string>
+
+    <string name="title_language">Language</string>
+    <string name="lang_vi">🇻🇳 Tiếng Việt</string>
+    <string name="lang_en">🇬🇧 English</string>
+
+    <string name="title_auto_update">Auto Update</string>
+    <string name="desc_auto_update">Lock screen wallpaper auto-refreshes daily at 00:05.</string>
+
+    <string name="title_app_info">Application Info</string>
+    <string name="desc_app_info">Lock Screen Calendar - Version 1.0</string>
+
+    <string name="reminder_no_reminders">• No reminders</string>
+    <string name="title_create_habit">Create New Habit</string>
+    <string name="hint_habit_name">Enter new habit name</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+
+    <string name="title_matrix">Matrix</string>
+    <string name="q1_title">Do First</string>
+    <string name="q1_sub">Urgent &amp; Important</string>
+    <string name="q2_title">Schedule</string>
+    <string name="q2_sub">Important, Not Urgent</string>
+    <string name="q3_title">Delegate</string>
+    <string name="q3_sub">Urgent, Not Important</string>
+    <string name="q4_title">Eliminate</string>
+    <string name="q4_sub">Neither Urgent Nor Important</string>
+
+    <string name="title_habits">Habits</string>
+    <string name="tab_week">Week</string>
+    <string name="tab_year">Year</string>
+    <string name="habit_walking">Morning Walk</string>
+    <string name="habit_water">Drink Water</string>
+    <string name="day_m">Mon</string>
+    <string name="day_t">Tue</string>
+    <string name="day_w">Wed</string>
+    <string name="day_th">Thu</string>
+    <string name="day_f">Fri</string>
+    <string name="day_s">Sat</string>
+    <string name="day_su">Sun</string>
+    <string name="month_name">October</string>
+    <string name="today">Today</string>
+    <string name="guide">Guide</string>
+    <string name="swipe_guide">Swipe ← to pick layout</string>
+    <string name="weekly_agenda">Week + agenda</string>
+    <string name="update_guide">Press "UPDATE" to refresh wallpaper. Or see:</string>
+    <string name="auto_update_guide">Guide for auto-updating wallpaper</string>
+    <string name="live_activities">Live Activities</string>
+    <string name="live_activities_desc">Show upcoming events and schedules directly on your lock screen.</string>
+    <string name="set_wallpaper">Set Wallpaper</string>
+</resources>

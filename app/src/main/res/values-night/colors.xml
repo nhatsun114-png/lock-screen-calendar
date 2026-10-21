@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Semantic App Colors for Dark Theme -->
+    <color name="bg_app">#121212</color>
+    <color name="bg_card">#1E1E1E</color>
+    <color name="bg_card_variant">#2A2A2A</color>
+    <color name="bg_nav_bar">#1E1E1E</color>
+    <color name="text_primary">#F5F5F5</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="divider_line">#333333</color>
+
+    <!-- Quadrants for Dark Theme -->
+    <color name="q1_bg">#1B3320</color>
+    <color name="q2_bg">#102A38</color>
+    <color name="q3_bg">#3E1A1A</color>
+    <color name="q4_bg">#252525</color>
+</resources>

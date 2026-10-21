@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import edu.hcmute.duan.data.model.EventModel
@@ -24,7 +25,9 @@ object CalendarWallpaperRenderer {
         val canvas = Canvas(bitmap)
         
         if (theme.bgImage != null) {
-            canvas.drawBitmap(theme.bgImage, 0f, 0f, null)
+            val srcRect = Rect(0, 0, theme.bgImage.width, theme.bgImage.height)
+            val dstRect = Rect(0, 0, theme.width, theme.height)
+            canvas.drawBitmap(theme.bgImage, srcRect, dstRect, null)
             val overlayPaint = Paint().apply { color = Color.parseColor("#99000000") }
             canvas.drawRect(0f, 0f, theme.width.toFloat(), theme.height.toFloat(), overlayPaint)
         } else {

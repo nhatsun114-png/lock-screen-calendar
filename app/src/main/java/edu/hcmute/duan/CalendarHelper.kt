@@ -43,12 +43,11 @@ object CalendarHelper {
         return calendars
     }
 
-    fun getEventsForCurrentMonth(context: Context, selectedCalIds: Set<String>): Map<Int, List<EventModel>> {
+    fun getEventsForMonth(context: Context, yearMonth: YearMonth = YearMonth.now(), selectedCalIds: Set<String>): Map<Int, List<EventModel>> {
         val eventsMap = mutableMapOf<Int, MutableList<EventModel>>()
         if (selectedCalIds.isEmpty()) return eventsMap
 
         try {
-            val yearMonth = YearMonth.now()
             val zoneId = ZoneId.systemDefault()
 
             val startMillis = yearMonth.atDay(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
@@ -110,39 +109,6 @@ object CalendarHelper {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-
-        if (eventsMap.isEmpty()) {
-            val now = LocalDate.now()
-            val todayDay = now.dayOfMonth
-            val maxDays = now.lengthOfMonth()
-
-            // Default sample events for current month
-            eventsMap[todayDay] = mutableListOf(
-                EventModel("Họp nhóm dự án Duan", System.currentTimeMillis(), System.currentTimeMillis() + 3600000, false, 0xFF00BCD4.toInt(), 1L),
-                EventModel("Làm bài tập Android Studio", System.currentTimeMillis() + 7200000, System.currentTimeMillis() + 10800000, false, 0xFF4CAF50.toInt(), 1L),
-                EventModel("Đọc sách 30 phút", System.currentTimeMillis() + 14400000, System.currentTimeMillis() + 16200000, false, 0xFF9C27B0.toInt(), 2L)
-            )
-
-            val day5 = 5.coerceAtMost(maxDays)
-            eventsMap[day5] = mutableListOf(
-                EventModel("Lên kế hoạch tuần mới", System.currentTimeMillis(), System.currentTimeMillis() + 3600000, true, 0xFFFF9800.toInt(), 1L)
-            )
-
-            val day12 = 12.coerceAtMost(maxDays)
-            eventsMap[day12] = mutableListOf(
-                EventModel("Kiểm tra giữa kỳ môn Android", System.currentTimeMillis(), System.currentTimeMillis() + 7200000, false, 0xFFF44336.toInt(), 2L)
-            )
-
-            val day20 = 20.coerceAtMost(maxDays)
-            eventsMap[day20] = mutableListOf(
-                EventModel("Họp trực tuyến với Giảng viên", System.currentTimeMillis(), System.currentTimeMillis() + 3600000, false, 0xFF3F51B5.toInt(), 1L)
-            )
-
-            val day25 = 25.coerceAtMost(maxDays)
-            eventsMap[day25] = mutableListOf(
-                EventModel("Nộp báo cáo đồ án", System.currentTimeMillis(), System.currentTimeMillis() + 3600000, true, 0xFFE91E63.toInt(), 1L)
-            )
         }
 
         return eventsMap

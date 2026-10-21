@@ -1,3 +1,95 @@
 <resources>
-    <string name="app_name">Duan</string>
+    <string name="app_name">Lịch Màn hình khóa</string>
+
+    <string name="tab_wallpaper">Hình nền</string>
+    <string name="tab_calendar">Lịch</string>
+    <string name="tab_reminders">Nhắc nhở</string>
+    <string name="tab_habits">Thói quen</string>
+    <string name="tab_settings">Cài đặt</string>
+
+    <string name="btn_customize_wallpaper">⚙️ TÙY CHỈNH HÌNH NỀN KHÓA</string>
+    <string name="btn_update_wallpaper">✔ CẬP NHẬT</string>
+    <string name="btn_apply_wallpaper">✓ Áp dụng làm hình nền khóa</string>
+    <string name="btn_pick_custom_bg">🖼️ Chọn ảnh nền tùy chỉnh từ Thư viện</string>
+    <string name="title_customize_wallpaper">Tùy chỉnh hình nền khóa</string>
+
+    <string name="title_layout_style">Kiểu Bố Cục</string>
+    <string name="layout_standard">Month agenda (Xem tháng chuẩn)</string>
+    <string name="layout_split">Split clock hole (Tách giữa đồng hồ)</string>
+    <string name="layout_weekly">Weekly tasks (Xem tuần &amp; Nhiệm vụ)</string>
+
+    <string name="title_calendar_colors">Màu Sắc Lịch</string>
+    <string name="color_past_day">Màu ngày đã qua</string>
+    <string name="color_future_day">Màu ngày sắp tới</string>
+    <string name="color_today">Màu nổi bật ngày hôm nay</string>
+    <string name="color_text_numbers">Màu chữ &amp; Số</string>
+    <string name="color_bg">Màu nền Lịch</string>
+
+    <string name="title_font_style">Kiểu Phông Chữ</string>
+    <string name="font_system">System</string>
+    <string name="font_serif">Serif</string>
+    <string name="font_mono">Mono</string>
+
+    <string name="title_position_size">Vị Trí &amp; Kích Thước</string>
+    <string name="label_y_offset">Vị trí dọc (Y-Offset)</string>
+    <string name="label_scale">Tỉ lệ phóng to/thu nhỏ (Scale)</string>
+
+    <string name="switch_monday_first">Bắt đầu tuần từ Thứ Hai</string>
+    <string name="switch_week_numbers">Hiển thị số thứ tự tuần</string>
+    <string name="switch_minimalist">Hiển thị chấm nhỏ tối giản cho sự kiện</string>
+
+    <string name="title_settings">Cài đặt hệ thống</string>
+    <string name="title_theme_mode">Giao diện (Theme Mode)</string>
+    <string name="theme_light">☀️ Chế độ Sáng (Light Mode)</string>
+    <string name="theme_dark">🌙 Chế độ Tối (Dark Mode)</string>
+    <string name="theme_system">⚙️ Theo hệ thống (System Default)</string>
+
+    <string name="title_language">Ngôn ngữ (Language)</string>
+    <string name="lang_vi">🇻🇳 Tiếng Việt</string>
+    <string name="lang_en">🇬🇧 English</string>
+
+    <string name="title_auto_update">Cập nhật tự động</string>
+    <string name="desc_auto_update">Hình nền khóa tự động làm mới lúc 00:05 mỗi ngày.</string>
+
+    <string name="title_app_info">Thông tin ứng dụng</string>
+    <string name="desc_app_info">Lịch Màn hình khóa - Phiên bản 1.0</string>
+
+    <string name="reminder_no_reminders">• Chưa có nhắc nhở</string>
+    <string name="title_create_habit">Tạo thói quen mới</string>
+    <string name="hint_habit_name">Nhập tên thói quen mới</string>
+    <string name="btn_save">Lưu</string>
+    <string name="btn_cancel">Hủy</string>
+
+    <string name="title_matrix">Ma trận</string>
+    <string name="q1_title">Làm ngay</string>
+    <string name="q1_sub">Quan trọng và khẩn cấp</string>
+    <string name="q2_title">Lên kế hoạch</string>
+    <string name="q2_sub">Quan trọng, chưa khẩn cấp</string>
+    <string name="q3_title">Ủy quyền</string>
+    <string name="q3_sub">Khẩn cấp, không quan trọng</string>
+    <string name="q4_title">Loại bỏ</string>
+    <string name="q4_sub">Không khẩn cấp cũng không...</string>
+
+    <string name="title_habits">Thói quen</string>
+    <string name="tab_week">Tuần</string>
+    <string name="tab_year">Năm</string>
+    <string name="habit_walking">Đi bộ sáng</string>
+    <string name="habit_water">Uống nước</string>
+    <string name="day_m">T2</string>
+    <string name="day_t">T3</string>
+    <string name="day_w">T4</string>
+    <string name="day_th">T5</string>
+    <string name="day_f">T6</string>
+    <string name="day_s">T7</string>
+    <string name="day_su">CN</string>
+    <string name="month_name">Tháng 10</string>
+    <string name="today">Hôm nay</string>
+    <string name="guide">Hướng dẫn</string>
+    <string name="swipe_guide">Vuốt ← để chọn kiểu lịch</string>
+    <string name="weekly_agenda">Tuần + lịch trình ngày</string>
+    <string name="update_guide">Nhấn "CẬP NHẬT" để làm mới hình nền. Hoặc xem:</string>
+    <string name="auto_update_guide">Hướng dẫn cập nhật hình nền tự động</string>
+    <string name="live_activities">Live Activities</string>
+    <string name="live_activities_desc">Hiển thị lịch trình và sự kiện sắp tới trực tiếp trên màn hình khóa.</string>
+    <string name="set_wallpaper">Đặt hình nền</string>
 </resources>

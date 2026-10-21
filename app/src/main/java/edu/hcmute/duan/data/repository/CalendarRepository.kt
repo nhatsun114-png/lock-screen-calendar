@@ -8,40 +8,178 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import edu.hcmute.duan.CalendarHelper
 import edu.hcmute.duan.CalendarUpdateWorker
+import edu.hcmute.duan.data.local.AppDatabase
+import edu.hcmute.duan.data.local.LocalEventEntity
 import edu.hcmute.duan.data.model.CalendarModel
 import edu.hcmute.duan.data.model.EventModel
+import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.time.ZoneId
 import java.util.Calendar
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import org.json.JSONArray
-import org.json.JSONObject
+import java.time.LocalDate
+import java.time.YearMonth
 
 class CalendarRepository(private val context: Context) {
+
+    private val localEventDao = AppDatabase.getDatabase(context).localEventDao()
+
+    init {
+        migrateSharedPreferencesToRoom()
+    }
+
+    private fun migrateSharedPreferencesToRoom() {
+        try {
+            val prefs = context.getSharedPreferences("local_user_events_prefs", Context.MODE_PRIVATE)
+            val jsonStr = prefs.getString("local_events_json", null) ?: return
+            val jsonArray = JSONArray(jsonStr)
+            if (jsonArray.length() > 0) {
+                runBlocking {
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
+                        localEventDao.insertEvent(
+                            LocalEventEntity(
+                                title = obj.getString("title"),
+                                beginMillis = obj.getLong("begin"),
+                                endMillis = obj.getLong("end"),
+                                allDay = obj.getBoolean("allDay"),
+                                color = obj.getInt("color"),
+                                calendarId = obj.getLong("calendarId")
+                            )
+                        )
+                    }
+                }
+                prefs.edit().remove("local_events_json").apply()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     fun getAvailableCalendars(): List<CalendarModel> {
         return CalendarHelper.getAvailableCalendars(context)
     }
 
-    fun getEventsForCurrentMonth(selectedCalIds: Set<String>): Map<Int, List<EventModel>> {
-        val systemEventsMap = CalendarHelper.getEventsForCurrentMonth(context, selectedCalIds).toMutableMap()
-        val localEvents = loadLocalEvents()
+    private fun seedInitialEventsIfEmpty() {
+        try {
+            val existing = localEventDao.getAllEventsSync()
+            if (existing.isEmpty()) {
+                val cal = Calendar.getInstance()
+                val currentYear = cal.get(Calendar.YEAR)
+                val currentMonth = cal.get(Calendar.MONTH)
+                val todayDay = cal.get(Calendar.DAY_OF_MONTH)
+                val maxDays = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-        val zoneId = ZoneId.systemDefault()
-        val currentYearMonth = java.time.YearMonth.now()
+                fun makeMillis(dayOfMonth: Int, hour: Int, minute: Int): Long {
+                    val c = Calendar.getInstance().apply {
+                        set(Calendar.YEAR, currentYear)
+                        set(Calendar.MONTH, currentMonth)
+                        set(Calendar.DAY_OF_MONTH, dayOfMonth.coerceAtMost(maxDays))
+                        set(Calendar.HOUR_OF_DAY, hour)
+                        set(Calendar.MINUTE, minute)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    return c.timeInMillis
+                }
 
-        for (evt in localEvents) {
-            val zdt = Instant.ofEpochMilli(evt.begin).atZone(zoneId)
-            if (zdt.year == currentYearMonth.year && zdt.month == currentYearMonth.month) {
-                val day = zdt.dayOfMonth
-                val list = systemEventsMap[day]?.toMutableList() ?: mutableListOf()
-                list.add(evt)
-                systemEventsMap[day] = list
+                val samples = listOf(
+                    LocalEventEntity(
+                        title = "Họp nhóm dự án Duan",
+                        beginMillis = makeMillis(todayDay, 9, 0),
+                        endMillis = makeMillis(todayDay, 10, 0),
+                        allDay = false,
+                        color = 0xFF00BCD4.toInt(),
+                        calendarId = 1L
+                    ),
+                    LocalEventEntity(
+                        title = "Làm bài tập Android Studio",
+                        beginMillis = makeMillis(todayDay, 11, 0),
+                        endMillis = makeMillis(todayDay, 12, 30),
+                        allDay = false,
+                        color = 0xFF4CAF50.toInt(),
+                        calendarId = 1L
+                    ),
+                    LocalEventEntity(
+                        title = "Đọc sách 30 phút",
+                        beginMillis = makeMillis(todayDay, 14, 0),
+                        endMillis = makeMillis(todayDay, 14, 30),
+                        allDay = false,
+                        color = 0xFF9C27B0.toInt(),
+                        calendarId = 2L
+                    ),
+                    LocalEventEntity(
+                        title = "Họp trực tuyến với Giảng viên",
+                        beginMillis = makeMillis(20, 10, 0),
+                        endMillis = makeMillis(20, 11, 0),
+                        allDay = false,
+                        color = 0xFF3F51B5.toInt(),
+                        calendarId = 1L
+                    ),
+                    LocalEventEntity(
+                        title = "Nộp báo cáo đồ án",
+                        beginMillis = makeMillis(25, 8, 0),
+                        endMillis = makeMillis(25, 17, 0),
+                        allDay = true,
+                        color = 0xFFE91E63.toInt(),
+                        calendarId = 1L
+                    )
+                )
+
+                runBlocking {
+                    for (s in samples) {
+                        localEventDao.insertEvent(s)
+                    }
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun getEventsForMonth(yearMonth: YearMonth = YearMonth.now(), selectedCalIds: Set<String>): Map<Int, List<EventModel>> {
+        seedInitialEventsIfEmpty()
+
+        val eventsMap = mutableMapOf<Int, MutableList<EventModel>>()
+
+        try {
+            val sysEvents = CalendarHelper.getEventsForMonth(context, yearMonth, selectedCalIds)
+            for ((day, list) in sysEvents) {
+                eventsMap[day] = list.toMutableList()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
-        return systemEventsMap
+        try {
+            val localEvents = loadLocalEvents()
+            val cal = Calendar.getInstance()
+
+            for (evt in localEvents) {
+                cal.timeInMillis = evt.begin
+                val evtYear = cal.get(Calendar.YEAR)
+                val evtMonth = cal.get(Calendar.MONTH) + 1
+                val evtDay = cal.get(Calendar.DAY_OF_MONTH)
+
+                if (evtYear == yearMonth.year && evtMonth == yearMonth.monthValue) {
+                    val list = eventsMap[evtDay] ?: mutableListOf()
+                    if (list.none { it.title == evt.title && it.begin == evt.begin }) {
+                        list.add(evt)
+                    }
+                    eventsMap[evtDay] = list
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return eventsMap
+    }
+
+    fun getEventsForCurrentMonth(selectedCalIds: Set<String>): Map<Int, List<EventModel>> {
+        return getEventsForMonth(YearMonth.now(), selectedCalIds)
     }
 
     fun addEventToCalendar(
@@ -63,7 +201,6 @@ class CalendarRepository(private val context: Context) {
             calendarId = calendarId
         )
 
-        // Always save locally so event instantly appears on calendar timeline
         saveLocalEvent(newEvent)
 
         try {
@@ -88,23 +225,18 @@ class CalendarRepository(private val context: Context) {
 
     private fun saveLocalEvent(event: EventModel) {
         try {
-            val existing = loadLocalEvents().toMutableList()
-            existing.add(event)
-
-            val prefs = context.getSharedPreferences("local_user_events_prefs", Context.MODE_PRIVATE)
-            val jsonArray = JSONArray()
-            for (evt in existing) {
-                val obj = JSONObject().apply {
-                    put("title", evt.title)
-                    put("begin", evt.begin)
-                    put("end", evt.end)
-                    put("allDay", evt.allDay)
-                    put("color", evt.color)
-                    put("calendarId", evt.calendarId)
-                }
-                jsonArray.put(obj)
+            runBlocking {
+                localEventDao.insertEvent(
+                    LocalEventEntity(
+                        title = event.title,
+                        beginMillis = event.begin,
+                        endMillis = event.end,
+                        allDay = event.allDay,
+                        color = event.color,
+                        calendarId = event.calendarId
+                    )
+                )
             }
-            prefs.edit().putString("local_events_json", jsonArray.toString()).apply()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -112,23 +244,9 @@ class CalendarRepository(private val context: Context) {
 
     fun deleteLocalEvent(eventTitle: String, eventBegin: Long) {
         try {
-            val existing = loadLocalEvents().toMutableList()
-            existing.removeAll { it.title == eventTitle && it.begin == eventBegin }
-
-            val prefs = context.getSharedPreferences("local_user_events_prefs", Context.MODE_PRIVATE)
-            val jsonArray = JSONArray()
-            for (evt in existing) {
-                val obj = JSONObject().apply {
-                    put("title", evt.title)
-                    put("begin", evt.begin)
-                    put("end", evt.end)
-                    put("allDay", evt.allDay)
-                    put("color", evt.color)
-                    put("calendarId", evt.calendarId)
-                }
-                jsonArray.put(obj)
+            runBlocking {
+                localEventDao.deleteEventByTitleAndBegin(eventTitle, eventBegin)
             }
-            prefs.edit().putString("local_events_json", jsonArray.toString()).apply()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -136,55 +254,31 @@ class CalendarRepository(private val context: Context) {
 
     fun updateLocalEvent(oldTitle: String, oldBegin: Long, newTitle: String) {
         try {
-            val existing = loadLocalEvents().toMutableList()
-            val index = existing.indexOfFirst { it.title == oldTitle && it.begin == oldBegin }
-            if (index != -1) {
-                val old = existing[index]
-                existing[index] = old.copy(title = newTitle)
+            runBlocking {
+                localEventDao.updateEventTitle(oldTitle, oldBegin, newTitle)
             }
-
-            val prefs = context.getSharedPreferences("local_user_events_prefs", Context.MODE_PRIVATE)
-            val jsonArray = JSONArray()
-            for (evt in existing) {
-                val obj = JSONObject().apply {
-                    put("title", evt.title)
-                    put("begin", evt.begin)
-                    put("end", evt.end)
-                    put("allDay", evt.allDay)
-                    put("color", evt.color)
-                    put("calendarId", evt.calendarId)
-                }
-                jsonArray.put(obj)
-            }
-            prefs.edit().putString("local_events_json", jsonArray.toString()).apply()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun loadLocalEvents(): List<EventModel> {
-        val list = mutableListOf<EventModel>()
-        try {
-            val prefs = context.getSharedPreferences("local_user_events_prefs", Context.MODE_PRIVATE)
-            val jsonStr = prefs.getString("local_events_json", null) ?: return emptyList()
-            val jsonArray = JSONArray(jsonStr)
-            for (i in 0 until jsonArray.length()) {
-                val obj = jsonArray.getJSONObject(i)
-                list.add(
-                    EventModel(
-                        title = obj.getString("title"),
-                        begin = obj.getLong("begin"),
-                        end = obj.getLong("end"),
-                        allDay = obj.getBoolean("allDay"),
-                        color = obj.getInt("color"),
-                        calendarId = obj.getLong("calendarId")
-                    )
+    fun loadLocalEvents(): List<EventModel> {
+        return try {
+            val entities = localEventDao.getAllEventsSync()
+            entities.map {
+                EventModel(
+                    title = it.title,
+                    begin = it.beginMillis,
+                    end = it.endMillis,
+                    allDay = it.allDay,
+                    color = it.color,
+                    calendarId = it.calendarId
                 )
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            emptyList()
         }
-        return list
     }
 
     fun scheduleDailyCalendarUpdate() {
@@ -204,9 +298,10 @@ class CalendarRepository(private val context: Context) {
             .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
             .build()
 
+        // Use ExistingPeriodicWorkPolicy.KEEP so timer is NOT reset on app open (TC-CORE-01 fix)
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "DailyCalendarUpdate",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             updateRequest
         )
     }

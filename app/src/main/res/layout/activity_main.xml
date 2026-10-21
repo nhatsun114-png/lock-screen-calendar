@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F5F7">
+    android:background="@color/bg_app">
 
     <RelativeLayout
         android:id="@+id/mainContent"
@@ -42,8 +42,8 @@
                             android:id="@+id/tvHeaderTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Lịch Màn hình khóa"
-                            android:textColor="#000000"
+                            android:text="@string/app_name"
+                            android:textColor="?attr/colorOnSurface"
                             android:textSize="26sp"
                             android:textStyle="bold"
                             android:layout_alignParentStart="true"
@@ -53,7 +53,7 @@
                             android:id="@+id/chipGuide"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Hướng dẫn"
+                            android:text="@string/guide"
                             android:textColor="#2196F3"
                             app:chipBackgroundColor="#E3F2FD"
                             app:chipCornerRadius="16dp"
@@ -67,7 +67,7 @@
                             android:id="@+id/tvHeaderSubtitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Vuốt ← để chọn kiểu lịch"
+                            android:text="@string/swipe_guide"
                             android:textColor="#888888"
                             android:textSize="14sp"
                             android:layout_below="@id/tvHeaderTitle"
@@ -76,27 +76,28 @@
 
                     <!-- MAIN PREVIEW CARD -->
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardWallpaperPreview"
                         android:layout_width="match_parent"
-                        android:layout_height="460dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="16dp"
-                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardBackgroundColor="@color/bg_card"
                         app:cardCornerRadius="24dp"
                         app:cardElevation="2dp"
                         app:strokeWidth="0dp">
 
                         <RelativeLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:padding="20dp">
 
                             <TextView
                                 android:id="@+id/tvStyleName"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Tuần + lịch trình ngày"
-                                android:textColor="#000000"
+                                android:text="@string/weekly_agenda"
+                                android:textColor="?attr/colorOnSurface"
                                 android:textSize="20sp"
                                 android:textStyle="bold"
                                 android:layout_alignParentStart="true"
@@ -106,7 +107,7 @@
                                 android:id="@+id/btnUpdateWallpaper"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="✔ CẬP NHẬT"
+                                android:text="@string/btn_update_wallpaper"
                                 android:textColor="#2196F3"
                                 app:backgroundTint="#E3F2FD"
                                 app:strokeColor="#2196F3"
@@ -121,10 +122,11 @@
                                 android:insetBottom="0dp" />
 
                             <FrameLayout
+                                android:id="@+id/previewFrame"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
+                                android:layout_height="320dp"
                                 android:layout_below="@id/tvStyleName"
-                                android:layout_marginTop="16dp"
+                                android:layout_marginTop="12dp"
                                 android:background="#000000">
 
                                 <ImageView
@@ -137,7 +139,7 @@
                                     android:id="@+id/btnCustomize"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Tùy chỉnh"
+                                    android:text="@string/tab_settings"
                                     android:layout_gravity="bottom|center_horizontal"
                                     android:layout_marginBottom="20dp"
                                     app:cornerRadius="24dp"
@@ -150,6 +152,19 @@
                                     android:paddingHorizontal="28dp"
                                     android:paddingVertical="10dp" />
                             </FrameLayout>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnOpenCustomize"
+                                android:layout_width="match_parent"
+                                android:layout_height="52dp"
+                                android:text="@string/btn_customize_wallpaper"
+                                android:textColor="#FFFFFF"
+                                app:backgroundTint="#2196F3"
+                                app:cornerRadius="16dp"
+                                android:textStyle="bold"
+                                android:textSize="15sp"
+                                android:layout_below="@id/previewFrame"
+                                android:layout_marginTop="12dp"/>
                         </RelativeLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -174,7 +189,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Nhấn &quot;CẬP NHẬT&quot; để làm mới hình nền. Hoặc xem:"
+                                android:text="@string/update_guide"
                                 android:textColor="#555555"
                                 android:textSize="14sp" />
 
@@ -182,13 +197,11 @@
                                 android:id="@+id/tvAutoUpdateGuide"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Hướng dẫn cập nhật hình nền tự động"
+                                android:text="@string/auto_update_guide"
                                 android:textColor="#2196F3"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
-                                android:layout_marginTop="4dp"
-                                android:clickable="true"
-                                android:focusable="true" />
+                                android:layout_marginTop="4dp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -198,7 +211,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
                         android:layout_marginBottom="16dp"
-                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardBackgroundColor="@color/bg_card"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="1dp">
 
@@ -216,8 +229,8 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Live Activities"
-                                    android:textColor="#000000"
+                                    android:text="@string/live_activities"
+                                    android:textColor="?attr/colorOnSurface"
                                     android:textSize="18sp"
                                     android:textStyle="bold" />
 
@@ -233,7 +246,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Hiển thị lịch trình và sự kiện sắp tới trực tiếp trên màn hình khóa."
+                                android:text="@string/live_activities_desc"
                                 android:textColor="#666666"
                                 android:textSize="14sp" />
                         </LinearLayout>
@@ -292,43 +305,88 @@
                         </LinearLayout>
                     </RelativeLayout>
 
-                    <!-- TITLE & TODAY BUTTON -->
+                    <!-- TITLE & NAVIGATION BAR -->
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="20dp"
                         android:paddingTop="12dp">
 
-                        <TextView
-                            android:id="@+id/tvCalendarMonthTitle"
+                        <LinearLayout
+                            android:id="@+id/llMonthHeader"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Tháng 10"
-                            android:textColor="#000000"
-                            android:textSize="32sp"
-                            android:textStyle="bold"
-                            android:layout_alignParentStart="true"/>
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_alignParentStart="true"
+                            android:clickable="true"
+                            android:focusable="true">
 
-                        <TextView
+                            <TextView
+                                android:id="@+id/tvCalendarMonthTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tháng 10, 2026"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textSize="26sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=" 📅"
+                                android:textSize="20sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Hôm nay"
-                            android:textColor="#000000"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
                             android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"/>
-                    </RelativeLayout>
+                            android:layout_centerVertical="true">
 
-                    <!-- DYNAMIC EVENTS CONTAINER FOR CALENDAR PAGE -->
-                    <LinearLayout
-                        android:id="@+id/llCalendarEventsContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="20dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="8dp"/>
+                            <TextView
+                                android:id="@+id/btnPrevWeek"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:text="‹"
+                                android:gravity="center"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:clickable="true"
+                                android:focusable="true" />
+
+                            <TextView
+                                android:id="@+id/btnBtnToday"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/today"
+                                android:textColor="#2196F3"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="4dp"
+                                android:background="?attr/selectableItemBackground"
+                                android:clickable="true"
+                                android:focusable="true" />
+
+                            <TextView
+                                android:id="@+id/btnNextWeek"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:text="›"
+                                android:gravity="center"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:clickable="true"
+                                android:focusable="true" />
+                        </LinearLayout>
+                    </RelativeLayout>
 
                     <!-- WEEKDAY + DATES ROW -->
                     <LinearLayout
@@ -336,54 +394,116 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:paddingHorizontal="16dp"
-                        android:paddingTop="16dp">
+                        android:paddingTop="12dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
-                            <!-- T2 -->
-                            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T2" android:textColor="#888888" android:textSize="12sp"/>
-                                <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="19" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                            <!-- DAY 1 -->
+                            <LinearLayout
+                                android:id="@+id/calDay1"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <TextView android:id="@+id/tvCalDayLabel1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T2" android:textColor="#888888" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tvCalDate1" android:layout_width="32dp" android:layout_height="32dp" android:text="19" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                                <View android:id="@+id/dotCal1" android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="2dp" android:visibility="invisible"/>
                             </LinearLayout>
 
-                            <!-- T3 -->
-                            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T3" android:textColor="#888888" android:textSize="12sp"/>
-                                <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="20" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
-                                <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="2dp"/>
+                            <!-- DAY 2 -->
+                            <LinearLayout
+                                android:id="@+id/calDay2"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <TextView android:id="@+id/tvCalDayLabel2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T3" android:textColor="#888888" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tvCalDate2" android:layout_width="32dp" android:layout_height="32dp" android:text="20" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                                <View android:id="@+id/dotCal2" android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="2dp" android:visibility="invisible"/>
                             </LinearLayout>
 
-                            <!-- T4 (Active Today) -->
-                            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T4" android:textColor="#888888" android:textSize="12sp"/>
-                                <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="21" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:gravity="center" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="4dp"/>
+                            <!-- DAY 3 -->
+                            <LinearLayout
+                                android:id="@+id/calDay3"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <TextView android:id="@+id/tvCalDayLabel3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T4" android:textColor="#888888" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tvCalDate3" android:layout_width="32dp" android:layout_height="32dp" android:text="21" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                                <View android:id="@+id/dotCal3" android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="2dp" android:visibility="invisible"/>
                             </LinearLayout>
 
-                            <!-- T5 -->
-                            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T5" android:textColor="#888888" android:textSize="12sp"/>
-                                <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="22" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                            <!-- DAY 4 -->
+                            <LinearLayout
+                                android:id="@+id/calDay4"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <TextView android:id="@+id/tvCalDayLabel4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T5" android:textColor="#888888" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tvCalDate4" android:layout_width="32dp" android:layout_height="32dp" android:text="22" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                                <View android:id="@+id/dotCal4" android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="2dp" android:visibility="invisible"/>
                             </LinearLayout>
 
-                            <!-- T6 -->
-                            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T6" android:textColor="#888888" android:textSize="12sp"/>
-                                <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="23" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                            <!-- DAY 5 -->
+                            <LinearLayout
+                                android:id="@+id/calDay5"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <TextView android:id="@+id/tvCalDayLabel5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T6" android:textColor="#888888" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tvCalDate5" android:layout_width="32dp" android:layout_height="32dp" android:text="23" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                                <View android:id="@+id/dotCal5" android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="2dp" android:visibility="invisible"/>
                             </LinearLayout>
 
-                            <!-- T7 -->
-                            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T7" android:textColor="#888888" android:textSize="12sp"/>
-                                <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="24" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                            <!-- DAY 6 -->
+                            <LinearLayout
+                                android:id="@+id/calDay6"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <TextView android:id="@+id/tvCalDayLabel6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T7" android:textColor="#888888" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tvCalDate6" android:layout_width="32dp" android:layout_height="32dp" android:text="24" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                                <View android:id="@+id/dotCal6" android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="2dp" android:visibility="invisible"/>
                             </LinearLayout>
 
-                            <!-- CN -->
-                            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CN" android:textColor="#888888" android:textSize="12sp"/>
-                                <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="25" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                            <!-- DAY 7 -->
+                            <LinearLayout
+                                android:id="@+id/calDay7"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <TextView android:id="@+id/tvCalDayLabel7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CN" android:textColor="#888888" android:textSize="12sp"/>
+                                <TextView android:id="@+id/tvCalDate7" android:layout_width="32dp" android:layout_height="32dp" android:text="25" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
+                                <View android:id="@+id/dotCal7" android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="2dp" android:visibility="invisible"/>
                             </LinearLayout>
 
                         </LinearLayout>
@@ -395,11 +515,21 @@
                             android:text="∨"
                             android:textColor="#888888"
                             android:textSize="18sp"
-                            android:padding="8dp"
                             android:layout_gravity="center_horizontal"
+                            android:padding="8dp"
                             android:clickable="true"
                             android:focusable="true"/>
                     </LinearLayout>
+
+                    <!-- DYNAMIC EVENTS CONTAINER FOR CALENDAR PAGE -->
+                    <LinearLayout
+                        android:id="@+id/llCalendarEventsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="20dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"/>
 
                     <!-- TIMELINE GRID (08:00 - 00:00) -->
                     <LinearLayout
@@ -613,7 +743,7 @@
                         <com.google.android.material.chip.Chip
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Đặt hình nền"
+                            android:text="@string/set_wallpaper"
                             android:textColor="#2196F3"
                             app:chipBackgroundColor="#E3F2FD"
                             app:chipCornerRadius="16dp"
@@ -628,8 +758,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ma trận"
-                        android:textColor="#000000"
+                        android:text="@string/title_matrix"
+                        android:textColor="?attr/colorOnSurface"
                         android:textSize="32sp"
                         android:textStyle="bold"
                         android:layout_marginHorizontal="20dp"
@@ -670,7 +800,7 @@
                                         android:id="@+id/q1Title"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Làm ngay"
+                                        android:text="@string/q1_title"
                                         android:textColor="#2E7D32"
                                         android:textSize="18sp"
                                         android:textStyle="bold"/>
@@ -693,7 +823,7 @@
                                         android:id="@+id/q1Sub"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Quan trọng và khẩn cấp"
+                                        android:text="@string/q1_sub"
                                         android:textColor="#666666"
                                         android:textSize="12sp"
                                         android:layout_below="@id/q1Title"
@@ -703,7 +833,7 @@
                                         android:id="@+id/tvQ1Content"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Chưa có nhắc nhở"
+                                        android:text="@string/reminder_no_reminders"
                                         android:textColor="#9E9E9E"
                                         android:textSize="14sp"
                                         android:layout_centerInParent="true"/>
@@ -730,7 +860,7 @@
                                         android:id="@+id/q2Title"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Lên kế hoạch"
+                                        android:text="@string/q2_title"
                                         android:textColor="#0288D1"
                                         android:textSize="18sp"
                                         android:textStyle="bold"/>
@@ -753,7 +883,7 @@
                                         android:id="@+id/q2Sub"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Quan trọng, chưa khẩn cấp"
+                                        android:text="@string/q2_sub"
                                         android:textColor="#666666"
                                         android:textSize="12sp"
                                         android:layout_below="@id/q2Title"
@@ -763,7 +893,7 @@
                                         android:id="@+id/tvQ2Content"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Chưa có nhắc nhở"
+                                        android:text="@string/reminder_no_reminders"
                                         android:textColor="#9E9E9E"
                                         android:textSize="14sp"
                                         android:layout_centerInParent="true"/>
@@ -798,7 +928,7 @@
                                         android:id="@+id/q3Title"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Ủy quyền"
+                                        android:text="@string/q3_title"
                                         android:textColor="#D32F2F"
                                         android:textSize="18sp"
                                         android:textStyle="bold"/>
@@ -821,7 +951,7 @@
                                         android:id="@+id/q3Sub"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Khẩn cấp, không quan trọng"
+                                        android:text="@string/q3_sub"
                                         android:textColor="#666666"
                                         android:textSize="12sp"
                                         android:layout_below="@id/q3Title"
@@ -831,7 +961,7 @@
                                         android:id="@+id/tvQ3Content"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Chưa có nhắc nhở"
+                                        android:text="@string/reminder_no_reminders"
                                         android:textColor="#9E9E9E"
                                         android:textSize="14sp"
                                         android:layout_centerInParent="true"/>
@@ -858,7 +988,7 @@
                                         android:id="@+id/q4Title"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Loại bỏ"
+                                        android:text="@string/q4_title"
                                         android:textColor="#616161"
                                         android:textSize="18sp"
                                         android:textStyle="bold"/>
@@ -881,7 +1011,7 @@
                                         android:id="@+id/q4Sub"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Không khẩn cấp cũng không..."
+                                        android:text="@string/q4_sub"
                                         android:textColor="#666666"
                                         android:textSize="12sp"
                                         android:layout_below="@id/q4Title"
@@ -891,7 +1021,7 @@
                                         android:id="@+id/tvQ4Content"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Chưa có nhắc nhở"
+                                        android:text="@string/reminder_no_reminders"
                                         android:textColor="#9E9E9E"
                                         android:textSize="14sp"
                                         android:layout_centerInParent="true"/>
@@ -900,448 +1030,6 @@
 
                         </LinearLayout>
                     </LinearLayout>
-                </LinearLayout>
-            </androidx.core.widget.NestedScrollView>
-
-            <!-- PAGE 4: THÓI QUEN (HABITS) PAGE -->
-            <androidx.core.widget.NestedScrollView
-                android:id="@+id/pageHabits"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fillViewport="true"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingBottom="16dp">
-
-                    <!-- TOP ACTION BAR -->
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="20dp"
-                        android:paddingTop="16dp">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_alignParentEnd="true">
-
-                            <TextView
-                                android:id="@+id/btnHabitHistory"
-                                android:layout_width="36dp"
-                                android:layout_height="36dp"
-                                android:text="🕒"
-                                android:gravity="center"
-                                android:textSize="18sp"
-                                android:background="#EAECEE"
-                                android:layout_marginEnd="8dp"
-                                android:clickable="true"
-                                android:focusable="true"/>
-
-                            <TextView
-                                android:id="@+id/btnAddHabit"
-                                android:layout_width="36dp"
-                                android:layout_height="36dp"
-                                android:text="+"
-                                android:gravity="center"
-                                android:textSize="22sp"
-                                android:textColor="#2196F3"
-                                android:background="#EAECEE"
-                                android:layout_marginEnd="8dp"
-                                android:clickable="true"
-                                android:focusable="true"/>
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/chipPro"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="PRO"
-                                android:textColor="#FFFFFF"
-                                app:chipBackgroundColor="#3E2723"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
-                                android:clickable="true"
-                                android:focusable="true"/>
-                        </LinearLayout>
-                    </RelativeLayout>
-
-                    <!-- TITLE -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Thói quen"
-                        android:textColor="#000000"
-                        android:textSize="32sp"
-                        android:textStyle="bold"
-                        android:layout_marginHorizontal="20dp"
-                        android:layout_marginTop="8dp"/>
-
-                    <!-- WEEKDAY + DATES STRIP -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="16dp"
-                        android:paddingTop="12dp">
-
-                        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T2" android:textColor="#888888" android:textSize="12sp"/>
-                            <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="19" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
-                        </LinearLayout>
-
-                        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T3" android:textColor="#888888" android:textSize="12sp"/>
-                            <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="20" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
-                        </LinearLayout>
-
-                        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T4" android:textColor="#888888" android:textSize="12sp"/>
-                            <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="21" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:gravity="center" android:background="@drawable/bg_day_active_circle" android:layout_marginTop="4dp"/>
-                        </LinearLayout>
-
-                        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T5" android:textColor="#888888" android:textSize="12sp"/>
-                            <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="22" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
-                        </LinearLayout>
-
-                        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T6" android:textColor="#888888" android:textSize="12sp"/>
-                            <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="23" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
-                        </LinearLayout>
-
-                        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="T7" android:textColor="#888888" android:textSize="12sp"/>
-                            <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="24" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
-                        </LinearLayout>
-
-                        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CN" android:textColor="#888888" android:textSize="12sp"/>
-                            <TextView android:layout_width="32dp" android:layout_height="32dp" android:text="25" android:textColor="#000000" android:textSize="16sp" android:gravity="center" android:layout_marginTop="4dp"/>
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <!-- SEGMENTED TOGGLE (TUẦN / NĂM) -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="44dp"
-                        android:orientation="horizontal"
-                        android:background="@drawable/bg_segmented_toggle"
-                        android:layout_marginHorizontal="20dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="16dp"
-                        android:padding="3dp">
-
-                        <TextView
-                            android:id="@+id/btnTabWeek"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
-                            android:text="Tuần"
-                            android:textColor="#000000"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:background="@drawable/bg_segmented_item_selected"
-                            android:clickable="true"
-                            android:focusable="true"/>
-
-                        <TextView
-                            android:id="@+id/btnTabYear"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
-                            android:text="Năm"
-                            android:textColor="#666666"
-                            android:textSize="14sp"
-                            android:gravity="center"
-                            android:clickable="true"
-                            android:focusable="true"/>
-                    </LinearLayout>
-
-                    <!-- HABIT CARD 1: ĐI BỘ SÁNG -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginBottom="16dp"
-                        app:cardBackgroundColor="#E8F5E9"
-                        app:cardCornerRadius="20dp"
-                        app:cardElevation="0dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-
-                                <TextView
-                                    android:id="@+id/h1Icon"
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
-                                    android:text="🚶"
-                                    android:gravity="center"
-                                    android:textSize="20sp"
-                                    android:background="#C8E6C9"
-                                    android:layout_alignParentStart="true"
-                                    android:layout_centerVertical="true"/>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="vertical"
-                                    android:layout_toEndOf="@id/h1Icon"
-                                    android:layout_marginStart="12dp"
-                                    android:layout_centerVertical="true">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Đi bộ sáng"
-                                        android:textColor="#000000"
-                                        android:textSize="18sp"
-                                        android:textStyle="bold"/>
-
-                                    <TextView
-                                        android:id="@+id/tvHabit1Streak"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="0d"
-                                        android:textColor="#888888"
-                                        android:textSize="13sp"
-                                        android:layout_marginTop="2dp"/>
-                                </LinearLayout>
-
-                                <TextView
-                                    android:id="@+id/btnCheckHabit1"
-                                    android:layout_width="44dp"
-                                    android:layout_height="44dp"
-                                    android:text="✓"
-                                    android:gravity="center"
-                                    android:textColor="#4CAF50"
-                                    android:textSize="22sp"
-                                    android:textStyle="bold"
-                                    android:background="#C8E6C9"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_centerVertical="true"
-                                    android:clickable="true"
-                                    android:focusable="true"/>
-
-                                <TextView
-                                    android:id="@+id/tvHabit1FlameBadge"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="1 🔥"
-                                    android:textColor="#E65100"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold"
-                                    android:background="#FFE0B2"
-                                    android:paddingHorizontal="10dp"
-                                    android:paddingVertical="4dp"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_centerVertical="true"
-                                    android:visibility="gone"/>
-                            </RelativeLayout>
-
-                            <!-- DAYS ROW FOR HABIT 1 (WEEK VIEW) -->
-                            <LinearLayout
-                                android:id="@+id/rowHabit1Week"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:layout_marginTop="16dp">
-
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T2 19" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#DCEDC8" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T3 20" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#DCEDC8" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T4 21" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" android:gravity="center" android:background="@drawable/bg_habit_dashed_day" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T5 22" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#DCEDC8" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T6 23" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#DCEDC8" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T7 24" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#DCEDC8" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="CN 25" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#DCEDC8"/>
-                            </LinearLayout>
-
-                            <!-- YEARLY HEATMAP CONTAINER FOR HABIT 1 (YEAR VIEW) -->
-                            <LinearLayout
-                                android:id="@+id/rowHabit1Year"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:layout_marginTop="16dp"
-                                android:gravity="center_vertical"
-                                android:visibility="gone">
-
-                                <LinearLayout
-                                    android:layout_width="16dp"
-                                    android:layout_height="64dp"
-                                    android:orientation="vertical"
-                                    android:layout_marginEnd="6dp">
-
-                                    <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:text="M" android:textColor="#888888" android:textSize="10sp" android:gravity="center"/>
-                                    <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:text="W" android:textColor="#888888" android:textSize="10sp" android:gravity="center"/>
-                                    <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:text="F" android:textColor="#888888" android:textSize="10sp" android:gravity="center"/>
-                                </LinearLayout>
-
-                                <GridLayout
-                                    android:id="@+id/gridHeatmap1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:columnCount="24"
-                                    android:rowCount="7"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <!-- HABIT CARD 2: UỐNG NƯỚC -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginBottom="16dp"
-                        app:cardBackgroundColor="#E1F5FE"
-                        app:cardCornerRadius="20dp"
-                        app:cardElevation="0dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-
-                                <TextView
-                                    android:id="@+id/h2Icon"
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
-                                    android:text="💧"
-                                    android:gravity="center"
-                                    android:textSize="20sp"
-                                    android:background="#B3E5FC"
-                                    android:layout_alignParentStart="true"
-                                    android:layout_centerVertical="true"/>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="vertical"
-                                    android:layout_toEndOf="@id/h2Icon"
-                                    android:layout_marginStart="12dp"
-                                    android:layout_centerVertical="true">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Uống nước"
-                                        android:textColor="#000000"
-                                        android:textSize="18sp"
-                                        android:textStyle="bold"/>
-
-                                    <TextView
-                                        android:id="@+id/tvHabit2Streak"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="0d"
-                                        android:textColor="#888888"
-                                        android:textSize="13sp"
-                                        android:layout_marginTop="2dp"/>
-                                </LinearLayout>
-
-                                <TextView
-                                    android:id="@+id/btnCheckHabit2"
-                                    android:layout_width="44dp"
-                                    android:layout_height="44dp"
-                                    android:text="✓"
-                                    android:gravity="center"
-                                    android:textColor="#0288D1"
-                                    android:textSize="22sp"
-                                    android:textStyle="bold"
-                                    android:background="#B3E5FC"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_centerVertical="true"
-                                    android:clickable="true"
-                                    android:focusable="true"/>
-
-                                <TextView
-                                    android:id="@+id/tvHabit2FlameBadge"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="1 🔥"
-                                    android:textColor="#E65100"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold"
-                                    android:background="#FFE0B2"
-                                    android:paddingHorizontal="10dp"
-                                    android:paddingVertical="4dp"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_centerVertical="true"
-                                    android:visibility="gone"/>
-                            </RelativeLayout>
-
-                            <!-- DAYS ROW FOR HABIT 2 (WEEK VIEW) -->
-                            <LinearLayout
-                                android:id="@+id/rowHabit2Week"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:layout_marginTop="16dp">
-
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T2 19" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#B3E5FC" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T3 20" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#B3E5FC" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T4 21" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" android:gravity="center" android:background="@drawable/bg_habit_dashed_day" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T5 22" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#B3E5FC" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T6 23" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#B3E5FC" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="T7 24" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#B3E5FC" android:layout_marginEnd="4dp"/>
-                                <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="36dp" android:text="CN 25" android:textColor="#888888" android:textSize="10sp" android:gravity="center" android:background="#B3E5FC"/>
-                            </LinearLayout>
-
-                            <!-- YEARLY HEATMAP CONTAINER FOR HABIT 2 (YEAR VIEW) -->
-                            <LinearLayout
-                                android:id="@+id/rowHabit2Year"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:layout_marginTop="16dp"
-                                android:gravity="center_vertical"
-                                android:visibility="gone">
-
-                                <LinearLayout
-                                    android:layout_width="16dp"
-                                    android:layout_height="64dp"
-                                    android:orientation="vertical"
-                                    android:layout_marginEnd="6dp">
-
-                                    <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:text="M" android:textColor="#888888" android:textSize="10sp" android:gravity="center"/>
-                                    <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:text="W" android:textColor="#888888" android:textSize="10sp" android:gravity="center"/>
-                                    <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:text="F" android:textColor="#888888" android:textSize="10sp" android:gravity="center"/>
-                                </LinearLayout>
-
-                                <GridLayout
-                                    android:id="@+id/gridHeatmap2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:columnCount="24"
-                                    android:rowCount="7"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <!-- DYNAMIC CUSTOM HABITS CONTAINER -->
-                    <LinearLayout
-                        android:id="@+id/llCustomHabitsContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
-
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
 
@@ -1362,16 +1050,17 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cài đặt hệ thống"
-                        android:textColor="#000000"
+                        android:text="@string/title_settings"
+                        android:textColor="?attr/colorOnSurface"
                         android:textSize="28sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
 
+                    <!-- CARD: Theme Selection (Light / Dark Mode) -->
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardBackgroundColor="@color/bg_card"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="1dp"
                         android:layout_marginBottom="16dp">
@@ -1385,8 +1074,103 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Cập nhật tự động"
-                                android:textColor="#000000"
+                                android:text="@string/title_theme_mode"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="8dp"/>
+
+                            <RadioGroup
+                                android:id="@+id/rgThemeMode"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <RadioButton
+                                    android:id="@+id/rbThemeLight"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/theme_light" />
+
+                                <RadioButton
+                                    android:id="@+id/rbThemeDark"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/theme_dark" />
+
+                                <RadioButton
+                                    android:id="@+id/rbThemeSystem"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/theme_system" />
+                            </RadioGroup>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- CARD: Language Selection -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardBackgroundColor="@color/bg_card"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="1dp"
+                        android:layout_marginBottom="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/title_language"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="8dp"/>
+
+                            <RadioGroup
+                                android:id="@+id/rgLanguage"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <RadioButton
+                                    android:id="@+id/rbLangVi"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lang_vi" />
+
+                                <RadioButton
+                                    android:id="@+id/rbLangEn"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lang_en" />
+                            </RadioGroup>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardBackgroundColor="@color/bg_card"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="1dp"
+                        android:layout_marginBottom="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/title_auto_update"
+                                android:textColor="?attr/colorOnSurface"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:layout_marginBottom="8dp"/>
@@ -1394,8 +1178,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Hình nền khóa tự động làm mới lúc 00:05 mỗi ngày."
-                                android:textColor="#666666"
+                                android:text="@string/desc_auto_update"
+                                android:textColor="@color/text_secondary"
                                 android:textSize="14sp"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -1403,7 +1187,7 @@
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardBackgroundColor="@color/bg_card"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="1dp">
 
@@ -1416,8 +1200,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Thông tin ứng dụng"
-                                android:textColor="#000000"
+                                android:text="@string/title_app_info"
+                                android:textColor="?attr/colorOnSurface"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:layout_marginBottom="8dp"/>
@@ -1425,8 +1209,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Lịch Màn hình khóa - Phiên bản 1.0"
-                                android:textColor="#666666"
+                                android:text="@string/desc_app_info"
+                                android:textColor="@color/text_secondary"
                                 android:textSize="14sp"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -1443,7 +1227,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="12dp"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="@color/bg_nav_bar"
             app:cardCornerRadius="34dp"
             app:cardElevation="8dp"
             app:strokeWidth="0dp">
@@ -1478,7 +1262,7 @@
                         android:id="@+id/tvNavWallpaper"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hình nền"
+                        android:text="@string/tab_wallpaper"
                         android:textColor="#2196F3"
                         android:textSize="11sp"
                         android:textStyle="bold"
@@ -1507,7 +1291,7 @@
                         android:id="@+id/tvNavCalendar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Lịch"
+                        android:text="@string/tab_calendar"
                         android:textColor="#666666"
                         android:textSize="11sp"
                         android:layout_marginTop="2dp" />
@@ -1535,35 +1319,7 @@
                         android:id="@+id/tvNavReminders"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nhắc nhở"
-                        android:textColor="#666666"
-                        android:textSize="11sp"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <!-- ITEM 4: THÓI QUEN -->
-                <LinearLayout
-                    android:id="@+id/navItemHabits"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:id="@+id/ivNavHabits"
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:src="@drawable/ic_nav_habits"
-                        app:tint="#666666" />
-
-                    <TextView
-                        android:id="@+id/tvNavHabits"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Thói quen"
+                        android:text="@string/tab_reminders"
                         android:textColor="#666666"
                         android:textSize="11sp"
                         android:layout_marginTop="2dp" />
@@ -1591,7 +1347,7 @@
                         android:id="@+id/tvNavSettings"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cài đặt"
+                        android:text="@string/tab_settings"
                         android:textColor="#666666"
                         android:textSize="11sp"
                         android:layout_marginTop="2dp" />
@@ -1601,266 +1357,4 @@
         </com.google.android.material.card.MaterialCardView>
 
     </RelativeLayout>
-
-    <!-- Bottom Sheet Customize Wallpaper -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/bottomSheet"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        app:behavior_peekHeight="0dp"
-        app:behavior_hideable="true"
-        app:cardBackgroundColor="#121212"
-        app:cardCornerRadius="32dp"
-        app:cardElevation="24dp">
-
-        <androidx.core.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="48dp"
-            android:fillViewport="true">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
-
-                <!-- Handle bar -->
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="4dp"
-                    android:background="#555555"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="24dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Customize Wallpaper"
-                    android:textColor="#FFFFFF"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="24dp" />
-
-                <!-- CARD 1: Day Colors -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="#1C1C1E"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Day colors"
-                            android:textStyle="bold"
-                            android:textSize="18sp"
-                            android:textColor="#EEEEEE"
-                            android:layout_marginBottom="16dp"/>
-
-                        <!-- Past Day -->
-                        <LinearLayout android:id="@+id/rowColorPast" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
-                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Past day" android:textColor="#CCCCCC" android:textSize="16sp"/>
-                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorPast" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#555555" app:strokeWidth="1dp" app:strokeColor="#444"/>
-                        </LinearLayout>
-
-                        <!-- Future Day -->
-                        <LinearLayout android:id="@+id/rowColorFuture" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
-                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Future day" android:textColor="#CCCCCC" android:textSize="16sp"/>
-                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorFuture" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#AAAAAA" app:strokeWidth="1dp" app:strokeColor="#444"/>
-                        </LinearLayout>
-
-                        <!-- Today -->
-                        <LinearLayout android:id="@+id/rowColorToday" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
-                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Today" android:textColor="#CCCCCC" android:textSize="16sp"/>
-                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorToday" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#4CAF50" app:strokeWidth="1dp" app:strokeColor="#444"/>
-                        </LinearLayout>
-
-                        <!-- Text & numbers -->
-                        <LinearLayout android:id="@+id/rowColorText" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
-                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Text &amp; numbers" android:textColor="#CCCCCC" android:textSize="16sp"/>
-                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorText" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#FFFFFF" app:strokeWidth="1dp" app:strokeColor="#444"/>
-                        </LinearLayout>
-
-                        <!-- Background -->
-                        <LinearLayout android:id="@+id/rowColorBg" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
-                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Calendar background" android:textColor="#CCCCCC" android:textSize="16sp"/>
-                            <com.google.android.material.card.MaterialCardView android:id="@+id/ivColorBg" android:layout_width="32dp" android:layout_height="32dp" app:cardCornerRadius="16dp" app:cardBackgroundColor="#000000" app:strokeWidth="1dp" app:strokeColor="#444"/>
-                        </LinearLayout>
-
-                        <!-- Pick Image -->
-                        <LinearLayout android:id="@+id/btnPickImage" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true">
-                            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Use Custom Background Image" android:textColor="#2196F3" android:textSize="16sp" android:textStyle="bold"/>
-                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_gallery" app:tint="#2196F3"/>
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- CARD 2: Font Style -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="#1C1C1E"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Font" android:textStyle="bold" android:textSize="18sp" android:textColor="#EEEEEE" android:layout_marginBottom="16dp"/>
-                        <com.google.android.material.button.MaterialButtonToggleGroup
-                            android:id="@+id/toggleFont"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:singleSelection="true"
-                            app:selectionRequired="true"
-                            app:checkedButton="@+id/btnFontSans">
-                            <Button android:id="@+id/btnFontSans" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="System" style="?attr/materialButtonOutlinedStyle" android:textColor="#FFF"/>
-                            <Button android:id="@+id/btnFontSerif" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Serif" style="?attr/materialButtonOutlinedStyle" android:textColor="#FFF"/>
-                            <Button android:id="@+id/btnFontMono" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Mono" style="?attr/materialButtonOutlinedStyle" android:textColor="#FFF"/>
-                        </com.google.android.material.button.MaterialButtonToggleGroup>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- CARD 3: Calendar Colors -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="#1C1C1E"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Calendar Colors" android:textStyle="bold" android:textSize="18sp" android:textColor="#EEEEEE" android:layout_marginBottom="8dp"/>
-
-                        <TextView android:id="@+id/btnRefreshCalendars" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="↻ Refresh calendars" android:textColor="#2196F3" android:textSize="16sp" android:layout_marginBottom="16dp" android:clickable="true" android:focusable="true"/>
-
-                        <!-- Dynamic Calendar List Container -->
-                        <LinearLayout android:id="@+id/llCalendarsContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
-
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- CARD 4: Layout & Adjustments -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
-                    app:cardBackgroundColor="#1C1C1E"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Event Chips &amp; Layout" android:textStyle="bold" android:textSize="18sp" android:textColor="#EEEEEE" android:layout_marginBottom="16dp"/>
-
-                        <!-- Switches -->
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchMinimalist"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Minimalist Events (Dots only)"
-                            app:showText="false"
-                            android:textColor="#CCCCCC"
-                            android:layout_marginBottom="12dp"
-                            android:checked="false"/>
-
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchMondayFirst"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Start week on Monday"
-                            app:showText="false"
-                            android:textColor="#CCCCCC"
-                            android:layout_marginBottom="12dp"
-                            android:checked="true"/>
-
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchWeekNumbers"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Show week numbers"
-                            app:showText="false"
-                            android:textColor="#CCCCCC"
-                            android:layout_marginBottom="16dp"
-                            android:checked="false"/>
-
-                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#333333" android:layout_marginBottom="16dp" />
-
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Layout Mode" android:textColor="#CCCCCC" />
-                        <RadioGroup
-                            android:id="@+id/rgLayoutStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginBottom="16dp">
-                            <RadioButton android:id="@+id/rbStandard" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Month Agenda" android:textColor="#FFFFFF" android:checked="true"/>
-                            <RadioButton android:id="@+id/rbSplit" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Month (Split clock hole)" android:textColor="#FFFFFF"/>
-                            <RadioButton android:id="@+id/rbWeekly" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Weekly + Today's Tasks" android:textColor="#FFFFFF"/>
-                        </RadioGroup>
-
-                        <!-- Sliders -->
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Vertical Position (Y Offset)" android:textColor="#CCCCCC" />
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekYOffset"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:valueFrom="0.0"
-                            android:valueTo="80.0"
-                            android:value="60.0"
-                            app:thumbColor="#2196F3"
-                            app:trackColorActive="#2196F3"
-                            app:trackColorInactive="#333333"
-                            android:layout_marginBottom="8dp"/>
-
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Calendar Size Scale" android:textColor="#CCCCCC" />
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekScale"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:valueFrom="50.0"
-                            android:valueTo="200.0"
-                            android:value="100.0"
-                            app:thumbColor="#2196F3"
-                            app:trackColorActive="#2196F3"
-                            app:trackColorInactive="#333333"
-                            android:layout_marginBottom="8dp"/>
-
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Button -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSetWallpaper"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:text="Save Configuration"
-                    android:textColor="#FFFFFF"
-                    app:backgroundTint="#2196F3"
-                    app:cornerRadius="16dp"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_marginBottom="16dp"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnReset"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:text="Reset to default"
-                    android:textColor="#FF8A80"
-                    app:backgroundTint="#1C1C1E"
-                    app:cornerRadius="16dp"
-                    android:textSize="16sp"
-                    android:layout_marginBottom="16dp"/>
-            </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
-    </com.google.android.material.card.MaterialCardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

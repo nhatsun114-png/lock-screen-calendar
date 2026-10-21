@@ -7,4 +7,19 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Semantic App Colors for Light Theme -->
+    <color name="bg_app">#F4F5F7</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="bg_card_variant">#F8F9FA</color>
+    <color name="bg_nav_bar">#FFFFFF</color>
+    <color name="text_primary">#111111</color>
+    <color name="text_secondary">#757575</color>
+    <color name="divider_line">#E0E0E0</color>
+
+    <!-- Quadrants for Light Theme -->
+    <color name="q1_bg">#E8F5E9</color>
+    <color name="q2_bg">#E1F5FE</color>
+    <color name="q3_bg">#FFEBEE</color>
+    <color name="q4_bg">#F5F5F5</color>
 </resources>

@@ -1,10 +1,15 @@
 package edu.hcmute.duan.ui.main
 
+import android.app.Application
 import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import edu.hcmute.duan.CalendarWallpaperRenderer
+import edu.hcmute.duan.data.local.AppDatabase
+import edu.hcmute.duan.data.local.HabitEntity
+import edu.hcmute.duan.data.local.ReminderEntity
 import edu.hcmute.duan.data.model.WallpaperTheme
 import edu.hcmute.duan.data.repository.CalendarRepository
 import edu.hcmute.duan.data.repository.SettingsRepository
@@ -16,12 +21,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.YearMonth
 
 class MainViewModel(
+    application: Application,
     private val settingsRepository: SettingsRepository,
     private val calendarRepository: CalendarRepository,
     private val wallpaperRepository: WallpaperRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
+
+    private val db = AppDatabase.getDatabase(application)
+    private val reminderDao = db.reminderDao()
+    private val habitDao = db.habitDao()
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -41,6 +53,8 @@ class MainViewModel(
         viewModelScope.launch {
             loadPrefs()
             refreshCalendarsAndEvents()
+            loadReminders()
+            loadHabits()
             calendarRepository.scheduleDailyCalendarUpdate()
         }
     }
@@ -59,6 +73,8 @@ class MainViewModel(
         val isMinimalistEvents = settingsRepository.isMinimalistEvents()
         val layoutStyle = settingsRepository.getLayoutStyle()
         val fontStyle = settingsRepository.getFontStyle()
+        val lang = settingsRepository.getLanguage()
+        val nightMode = settingsRepository.getNightMode()
 
         _uiState.update { state ->
             state.copy(
@@ -74,12 +90,24 @@ class MainViewModel(
                 showWeekNumbers = showWeekNumbers,
                 isMinimalistEvents = isMinimalistEvents,
                 layoutStyle = layoutStyle,
-                fontStyle = fontStyle
+                fontStyle = fontStyle,
+                language = lang,
+                nightMode = nightMode
             )
         }
     }
 
-    fun refreshCalendarsAndEvents() {
+    fun onLanguageChanged(langCode: String) {
+        settingsRepository.setLanguage(langCode)
+        _uiState.update { it.copy(language = langCode) }
+    }
+
+    fun onNightModeChanged(mode: Int) {
+        settingsRepository.setNightMode(mode)
+        _uiState.update { it.copy(nightMode = mode) }
+    }
+
+    fun refreshCalendarsAndEvents(yearMonth: YearMonth = YearMonth.now()) {
         viewModelScope.launch(Dispatchers.IO) {
             val calendars = calendarRepository.getAvailableCalendars()
             val enabledMap = mutableMapOf<Long, Boolean>()
@@ -96,19 +124,86 @@ class MainViewModel(
                 }
             }
 
-            val events = calendarRepository.getEventsForCurrentMonth(selectedCalIds)
+            val events = calendarRepository.getEventsForMonth(yearMonth, selectedCalIds)
 
             withContext(Dispatchers.Main) {
-                _uiState.update { state ->
-                    state.copy(
-                        calendars = calendars,
-                        calendarEnabledMap = enabledMap,
-                        calendarColorMap = colorMap,
-                        events = events
-                    )
-                }
+                _uiState.value = _uiState.value.copy(
+                    calendars = calendars,
+                    calendarEnabledMap = enabledMap,
+                    calendarColorMap = colorMap,
+                    events = events
+                )
                 updatePreview()
             }
+        }
+    }
+
+    // Reminders Management
+    fun loadReminders() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val list = reminderDao.getAllReminders()
+            withContext(Dispatchers.Main) {
+                _uiState.update { it.copy(reminders = list) }
+            }
+        }
+    }
+
+    fun addReminder(title: String, quadrant: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val q = when (quadrant) {
+                "Làm ngay" -> "Q1"
+                "Lên kế hoạch" -> "Q2"
+                "Ủy quyền" -> "Q3"
+                "Loại bỏ" -> "Q4"
+                else -> "Q1"
+            }
+            val newEntity = ReminderEntity(
+                title = title,
+                timeMillis = System.currentTimeMillis(),
+                priorityQuadrant = q
+            )
+            reminderDao.insertReminder(newEntity)
+            loadReminders()
+        }
+    }
+
+    // Habits Management
+    fun loadHabits() {
+        viewModelScope.launch(Dispatchers.IO) {
+            var habits = habitDao.getAllHabits()
+            if (habits.isEmpty()) {
+                val h1 = HabitEntity(name = "Đi bộ sáng 30p", icon = "🚶‍♂️", streak = 3)
+                val h2 = HabitEntity(name = "Uống 2L nước", icon = "💧", streak = 5)
+                habitDao.insertHabit(h1)
+                habitDao.insertHabit(h2)
+                habits = habitDao.getAllHabits()
+            }
+            withContext(Dispatchers.Main) {
+                _uiState.update { it.copy(habits = habits) }
+            }
+        }
+    }
+
+    fun addHabit(name: String, icon: String = "✨") {
+        viewModelScope.launch(Dispatchers.IO) {
+            val newHabit = HabitEntity(name = name, icon = icon, streak = 0)
+            habitDao.insertHabit(newHabit)
+            loadHabits()
+        }
+    }
+
+    fun toggleHabitCheckedToday(habitId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val habit = habitDao.getAllHabits().find { it.id == habitId } ?: return@launch
+            val todayStr = LocalDate.now().toString()
+            val isCheckedToday = habit.lastCheckedDate == todayStr
+
+            val newStreak = if (isCheckedToday) (habit.streak - 1).coerceAtLeast(0) else habit.streak + 1
+            val newLastChecked = if (isCheckedToday) "" else todayStr
+
+            val updated = habit.copy(streak = newStreak, lastCheckedDate = newLastChecked)
+            habitDao.updateHabit(updated)
+            loadHabits()
         }
     }
 
@@ -170,7 +265,8 @@ class MainViewModel(
     fun onCustomImagePicked(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             val width = if (screenWidth > 0) screenWidth else 1080
-            val success = settingsRepository.saveCustomImage(uri, width)
+            val height = if (screenHeight > 0) screenHeight else 1920
+            val success = settingsRepository.saveCustomImage(uri, width, height)
             withContext(Dispatchers.Main) {
                 if (success) {
                     _uiState.update { it.copy(isUsingImage = true) }
@@ -295,6 +391,7 @@ class MainViewModel(
 }
 
 class MainViewModelFactory(
+    private val application: Application,
     private val settingsRepository: SettingsRepository,
     private val calendarRepository: CalendarRepository,
     private val wallpaperRepository: WallpaperRepository
@@ -302,7 +399,12 @@ class MainViewModelFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            return MainViewModel(settingsRepository, calendarRepository, wallpaperRepository) as T
+            return MainViewModel(
+                application,
+                settingsRepository,
+                calendarRepository,
+                wallpaperRepository
+            ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import kotlin.math.abs
 
 class AlarmScheduler(private val context: Context) {
 
@@ -22,37 +23,73 @@ class AlarmScheduler(private val context: Context) {
                 return false
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (!alarmManager.canScheduleExactAlarms()) {
-                    // Fallback to normal alarm if exact alarm permission is disabled
-                }
-            }
+            val safeId = if (notificationId == 0) generateUniqueId(triggerAtMillis, eventTitle) else notificationId
 
             val intent = Intent(context, AlarmReceiver::class.java).apply {
                 putExtra(AlarmReceiver.EXTRA_EVENT_TITLE, eventTitle)
                 putExtra(AlarmReceiver.EXTRA_EVENT_TIME_TEXT, eventTimeText)
-                putExtra(AlarmReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+                putExtra(AlarmReceiver.EXTRA_NOTIFICATION_ID, safeId)
             }
 
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
-                notificationId,
+                safeId,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerAtMillis,
-                    pendingIntent
-                )
+            var canUseExact = true
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                canUseExact = alarmManager.canScheduleExactAlarms()
+            }
+
+            if (canUseExact) {
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            triggerAtMillis,
+                            pendingIntent
+                        )
+                    } else {
+                        alarmManager.setExact(
+                            AlarmManager.RTC_WAKEUP,
+                            triggerAtMillis,
+                            pendingIntent
+                        )
+                    }
+                } catch (se: SecurityException) {
+                    se.printStackTrace()
+                    // Fallback to non-exact alarm if exact alarm permission is missing/revoked
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            triggerAtMillis,
+                            pendingIntent
+                        )
+                    } else {
+                        alarmManager.set(
+                            AlarmManager.RTC_WAKEUP,
+                            triggerAtMillis,
+                            pendingIntent
+                        )
+                    }
+                }
             } else {
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerAtMillis,
-                    pendingIntent
-                )
+                // Non-exact alarm fallback on Android 12+ if canScheduleExactAlarms is false
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAtMillis,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.set(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAtMillis,
+                        pendingIntent
+                    )
+                }
             }
             true
         } catch (e: Exception) {
@@ -75,6 +112,13 @@ class AlarmScheduler(private val context: Context) {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    companion object {
+        fun generateUniqueId(triggerAtMillis: Long, title: String): Int {
+            val raw = (triggerAtMillis xor (triggerAtMillis ushr 16)).toInt() + title.hashCode()
+            return abs(raw % 1_000_000_000)
         }
     }
 }

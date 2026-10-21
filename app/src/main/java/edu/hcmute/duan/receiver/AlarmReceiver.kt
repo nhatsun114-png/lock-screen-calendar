@@ -12,13 +12,15 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import edu.hcmute.duan.MainActivity
 import edu.hcmute.duan.R
+import kotlin.math.abs
 
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val eventTitle = intent.getStringExtra(EXTRA_EVENT_TITLE) ?: "Sự kiện lịch"
         val eventTimeText = intent.getStringExtra(EXTRA_EVENT_TIME_TEXT) ?: "Sắp diễn ra"
-        val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, System.currentTimeMillis().toInt())
+        val fallbackId = abs((System.currentTimeMillis() % 1_000_000_000).toInt())
+        val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, fallbackId)
 
         showNotification(context, notificationId, eventTitle, eventTimeText)
     }

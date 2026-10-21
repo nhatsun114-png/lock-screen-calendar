@@ -1,20 +1,23 @@
 package edu.hcmute.duan
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import java.util.Calendar
-import java.util.Locale
 import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -22,36 +25,48 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.slider.Slider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import edu.hcmute.duan.data.model.CalendarModel
+import edu.hcmute.duan.data.model.EventModel
 import edu.hcmute.duan.data.repository.CalendarRepository
 import edu.hcmute.duan.data.repository.SettingsRepository
 import edu.hcmute.duan.data.repository.WallpaperRepository
 import edu.hcmute.duan.databinding.ActivityMainBinding
+import edu.hcmute.duan.ui.customize.CustomizeActivity
 import edu.hcmute.duan.ui.dialog.AddEventDialog
 import edu.hcmute.duan.ui.dialog.AddReminderDialog
 import edu.hcmute.duan.ui.dialog.ColorPickerDialog
 import edu.hcmute.duan.ui.main.MainUiState
 import edu.hcmute.duan.ui.main.MainViewModel
 import edu.hcmute.duan.ui.main.MainViewModelFactory
+import edu.hcmute.duan.util.LocaleHelper
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import android.app.DatePickerDialog
+import java.util.Calendar
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private var selectedCalendarDate: LocalDate = LocalDate.now()
 
     private val calendarRepository by lazy { CalendarRepository(applicationContext) }
 
     private val viewModel: MainViewModel by lazy {
         val factory = MainViewModelFactory(
+            application,
             SettingsRepository(applicationContext),
             calendarRepository,
             WallpaperRepository(applicationContext)
@@ -66,15 +81,22 @@ class MainActivity : AppCompatActivity() {
             uri?.let { viewModel.onCustomImagePicked(it) }
         }
 
+    override fun attachBaseContext(newBase: Context) {
+        val lang = SettingsRepository(newBase).getLanguage()
+        val localizedContext = LocaleHelper.setLocale(newBase, lang)
+        super.attachBaseContext(localizedContext)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val settingsRepo = SettingsRepository(applicationContext)
+        AppCompatDelegate.setDefaultNightMode(settingsRepo.getNightMode())
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         initDisplayMetrics()
-        initBottomSheet()
         setupListeners()
-        setupHeatmapGrids()
         setupInitialDefaultData()
         observeViewModel()
 
@@ -88,46 +110,23 @@ class MainActivity : AppCompatActivity() {
         viewModel.initScreenDimensions(displayMetrics.widthPixels, displayMetrics.heightPixels)
     }
 
-    private fun initBottomSheet() {
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-
-        val displayMetrics = DisplayMetrics()
-        @Suppress("DEPRECATION")
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val screenHeight = displayMetrics.heightPixels
-
-        bottomSheetBehavior.maxHeight = (screenHeight * 0.55).toInt()
-
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {}
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                val safeOffset = if (slideOffset < 0f) 0f else slideOffset
-                val scale = 1f - (safeOffset * 0.55f)
-
-                binding.mainContent.pivotX = binding.mainContent.width / 2f
-                binding.mainContent.pivotY = 0f
-                binding.mainContent.scaleX = scale
-                binding.mainContent.scaleY = scale
-                binding.mainContent.translationY = 0f
-
-                binding.btnCustomize.alpha = 1f - safeOffset
-            }
-        })
-
-        binding.btnCustomize.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        }
-    }
-
     private fun setupListeners() {
+        // Customize Button & Preview -> Opens CustomizeActivity
+        binding.ivPreview.setOnClickListener {
+            startActivity(Intent(this, CustomizeActivity::class.java))
+        }
+        binding.btnCustomize.setOnClickListener {
+            startActivity(Intent(this, CustomizeActivity::class.java))
+        }
+        binding.btnOpenCustomize.setOnClickListener {
+            startActivity(Intent(this, CustomizeActivity::class.java))
+        }
+
         // Bottom Navigation Bar Items
         binding.navItemWallpaper.setOnClickListener { selectTab(0) }
         binding.navItemCalendar.setOnClickListener { selectTab(1) }
         binding.navItemReminders.setOnClickListener { selectTab(2) }
-        binding.navItemHabits.setOnClickListener { selectTab(3) }
-        binding.navItemSettings.setOnClickListener { selectTab(4) }
+        binding.navItemSettings.setOnClickListener { selectTab(3) }
 
         binding.chipGuide.setOnClickListener {
             Toast.makeText(this, "Mở hướng dẫn thiết lập hình nền tự động", Toast.LENGTH_SHORT).show()
@@ -138,9 +137,29 @@ class MainActivity : AppCompatActivity() {
 
         // Add Event button in Calendar page
         binding.btnAddCalendarEvent.setOnClickListener {
-            checkAndRequestCalendarPermissions {
-                openAddEventBottomSheet()
-            }
+            openAddEventBottomSheet()
+        }
+
+        binding.btnPrevWeek.setOnClickListener {
+            selectedCalendarDate = selectedCalendarDate.minusWeeks(1)
+            updateCalendarWeekStrip()
+            renderTimelineEvents(viewModel.uiState.value.events)
+        }
+
+        binding.btnNextWeek.setOnClickListener {
+            selectedCalendarDate = selectedCalendarDate.plusWeeks(1)
+            updateCalendarWeekStrip()
+            renderTimelineEvents(viewModel.uiState.value.events)
+        }
+
+        binding.btnBtnToday.setOnClickListener {
+            selectedCalendarDate = LocalDate.now()
+            updateCalendarWeekStrip()
+            renderTimelineEvents(viewModel.uiState.value.events)
+        }
+
+        binding.llMonthHeader.setOnClickListener {
+            openDatePicker()
         }
 
         // Add Reminder buttons in Reminders Eisenhower Matrix page
@@ -148,127 +167,6 @@ class MainActivity : AppCompatActivity() {
         binding.btnAddQ2.setOnClickListener { openAddReminderBottomSheet("Lên kế hoạch") }
         binding.btnAddQ3.setOnClickListener { openAddReminderBottomSheet("Ủy quyền") }
         binding.btnAddQ4.setOnClickListener { openAddReminderBottomSheet("Loại bỏ") }
-
-        // Habits page listeners
-        binding.btnHabitHistory.setOnClickListener {
-            Toast.makeText(this, "Lịch sử hoàn thành thói quen", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnAddHabit.setOnClickListener {
-            val input = android.widget.EditText(this).apply {
-                hint = "Nhập tên thói quen mới"
-                setPadding(48, 32, 48, 32)
-            }
-            com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle("Tạo thói quen mới")
-                .setView(input)
-                .setPositiveButton("Lưu") { dialog, _ ->
-                    val habitName = input.text.toString().trim()
-                    if (habitName.isNotEmpty()) {
-                        addNewHabitCard(habitName)
-                        Toast.makeText(this, "Đã tạo thói quen mới: $habitName! 🎉", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Vui lòng nhập tên thói quen!", Toast.LENGTH_SHORT).show()
-                    }
-                    dialog.dismiss()
-                }
-                .setNegativeButton("Hủy", null)
-                .show()
-        }
-
-        binding.chipPro.setOnClickListener {
-            Toast.makeText(this, "Tính năng PRO: Mở khóa thêm không giới hạn thói quen!", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnTabWeek.setOnClickListener {
-            binding.btnTabWeek.setBackgroundResource(R.drawable.bg_segmented_item_selected)
-            binding.btnTabWeek.setTextColor(Color.BLACK)
-            binding.btnTabWeek.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
-
-            binding.btnTabYear.setBackgroundResource(0)
-            binding.btnTabYear.setTextColor(Color.parseColor("#666666"))
-            binding.btnTabYear.setTypeface(Typeface.DEFAULT, Typeface.NORMAL)
-
-            binding.rowHabit1Week.visibility = View.VISIBLE
-            binding.rowHabit1Year.visibility = View.GONE
-            binding.rowHabit2Week.visibility = View.VISIBLE
-            binding.rowHabit2Year.visibility = View.GONE
-
-            binding.btnCheckHabit1.visibility = View.VISIBLE
-            binding.btnCheckHabit2.visibility = View.VISIBLE
-            binding.tvHabit1FlameBadge.visibility = View.GONE
-            binding.tvHabit2FlameBadge.visibility = View.GONE
-            binding.tvHabit1Streak.text = "0d"
-            binding.tvHabit2Streak.text = "0d"
-
-            for (group in customHabitCardViews) {
-                group.weekRow.visibility = View.VISIBLE
-                group.yearRow.visibility = View.GONE
-                group.checkBtn.visibility = View.VISIBLE
-                group.flameBadge.visibility = View.GONE
-                group.streakTv.text = "0d"
-            }
-        }
-
-        binding.btnTabYear.setOnClickListener {
-            binding.btnTabYear.setBackgroundResource(R.drawable.bg_segmented_item_selected)
-            binding.btnTabYear.setTextColor(Color.BLACK)
-            binding.btnTabYear.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
-
-            binding.btnTabWeek.setBackgroundResource(0)
-            binding.btnTabWeek.setTextColor(Color.parseColor("#666666"))
-            binding.btnTabWeek.setTypeface(Typeface.DEFAULT, Typeface.NORMAL)
-
-            binding.rowHabit1Week.visibility = View.GONE
-            binding.rowHabit1Year.visibility = View.VISIBLE
-            binding.rowHabit2Week.visibility = View.GONE
-            binding.rowHabit2Year.visibility = View.VISIBLE
-
-            binding.btnCheckHabit1.visibility = View.GONE
-            binding.btnCheckHabit2.visibility = View.GONE
-            binding.tvHabit1FlameBadge.visibility = View.VISIBLE
-            binding.tvHabit2FlameBadge.visibility = View.VISIBLE
-            binding.tvHabit1Streak.text = "0d · 17:29"
-            binding.tvHabit2Streak.text = "0d · 17:29"
-
-            for (group in customHabitCardViews) {
-                group.weekRow.visibility = View.GONE
-                group.yearRow.visibility = View.VISIBLE
-                group.checkBtn.visibility = View.GONE
-                group.flameBadge.visibility = View.VISIBLE
-                group.streakTv.text = "0d · 17:29"
-            }
-        }
-
-        var isHabit1Completed = false
-        binding.btnCheckHabit1.setOnClickListener {
-            isHabit1Completed = !isHabit1Completed
-            if (isHabit1Completed) {
-                binding.tvHabit1Streak.text = "1d"
-                binding.btnCheckHabit1.setBackgroundColor(Color.parseColor("#4CAF50"))
-                binding.btnCheckHabit1.setTextColor(Color.WHITE)
-                Toast.makeText(this, "Đã hoàn thành: Đi bộ sáng! 🎉", Toast.LENGTH_SHORT).show()
-            } else {
-                binding.tvHabit1Streak.text = "0d"
-                binding.btnCheckHabit1.setBackgroundColor(Color.parseColor("#C8E6C9"))
-                binding.btnCheckHabit1.setTextColor(Color.parseColor("#4CAF50"))
-            }
-        }
-
-        var isHabit2Completed = false
-        binding.btnCheckHabit2.setOnClickListener {
-            isHabit2Completed = !isHabit2Completed
-            if (isHabit2Completed) {
-                binding.tvHabit2Streak.text = "1d"
-                binding.btnCheckHabit2.setBackgroundColor(Color.parseColor("#0288D1"))
-                binding.btnCheckHabit2.setTextColor(Color.WHITE)
-                Toast.makeText(this, "Đã hoàn thành: Uống nước! 💧", Toast.LENGTH_SHORT).show()
-            } else {
-                binding.tvHabit2Streak.text = "0d"
-                binding.btnCheckHabit2.setBackgroundColor(Color.parseColor("#B3E5FC"))
-                binding.btnCheckHabit2.setTextColor(Color.parseColor("#0288D1"))
-            }
-        }
 
         binding.btnTogglePastHours.setOnClickListener {
             showPastHours = !showPastHours
@@ -278,446 +176,51 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
 
-        binding.rowColorPast.setOnClickListener {
-            ColorPickerDialog.show(this, "Past Day Color", viewModel.uiState.value.colorPast) {
-                viewModel.onColorPastChanged(it)
-            }
-        }
-        binding.rowColorFuture.setOnClickListener {
-            ColorPickerDialog.show(this, "Future Day Color", viewModel.uiState.value.colorFuture) {
-                viewModel.onColorFutureChanged(it)
-            }
-        }
-        binding.rowColorToday.setOnClickListener {
-            ColorPickerDialog.show(this, "Today Highlight Color", viewModel.uiState.value.colorToday) {
-                viewModel.onColorTodayChanged(it)
-            }
-        }
-        binding.rowColorText.setOnClickListener {
-            ColorPickerDialog.show(this, "Text & Numbers Color", viewModel.uiState.value.colorText) {
-                viewModel.onColorTextChanged(it)
-            }
-        }
-        binding.rowColorBg.setOnClickListener {
-            ColorPickerDialog.show(this, "Background Color", viewModel.uiState.value.colorBg) {
-                viewModel.onColorBgChanged(it)
-            }
-        }
-
-        binding.btnPickImage.setOnClickListener {
-            imagePickerLauncher.launch("image/*")
-        }
-
-        binding.btnRefreshCalendars.setOnClickListener {
-            checkAndRequestCalendarPermissions {
-                viewModel.refreshCalendarsAndEvents()
-            }
-        }
-
-        val sliderListener = object : Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(slider: Slider) {}
-            override fun onStopTrackingTouch(slider: Slider) {
-                if (slider.id == binding.seekYOffset.id) {
-                    viewModel.onYOffsetChanged(slider.value)
-                } else if (slider.id == binding.seekScale.id) {
-                    viewModel.onScaleChanged(slider.value)
-                }
-            }
-        }
-        binding.seekYOffset.addOnSliderTouchListener(sliderListener)
-        binding.seekScale.addOnSliderTouchListener(sliderListener)
-
-        binding.switchMondayFirst.setOnCheckedChangeListener { _, isChecked ->
-            if (!isUpdatingUiFromState) viewModel.onMondayFirstChanged(isChecked)
-        }
-        binding.switchWeekNumbers.setOnCheckedChangeListener { _, isChecked ->
-            if (!isUpdatingUiFromState) viewModel.onWeekNumbersChanged(isChecked)
-        }
-        binding.switchMinimalist.setOnCheckedChangeListener { _, isChecked ->
-            if (!isUpdatingUiFromState) viewModel.onMinimalistEventsChanged(isChecked)
-        }
-
-        binding.rgLayoutStyle.setOnCheckedChangeListener { _, checkedId ->
-            if (!isUpdatingUiFromState) {
-                val layoutStyle = when (checkedId) {
-                    binding.rbStandard.id -> 0
-                    binding.rbSplit.id -> 1
-                    binding.rbWeekly.id -> 2
-                    else -> 0
-                }
-                viewModel.onLayoutStyleChanged(layoutStyle)
-            }
-        }
-
-        binding.toggleFont.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isUpdatingUiFromState && isChecked) {
-                val fontStyle = when (checkedId) {
-                    binding.btnFontSans.id -> 0
-                    binding.btnFontSerif.id -> 1
-                    binding.btnFontMono.id -> 2
-                    else -> 0
-                }
-                viewModel.onFontStyleChanged(fontStyle)
-            }
-        }
-
         binding.btnUpdateWallpaper.setOnClickListener {
             viewModel.applyWallpaperToLockScreen()
         }
 
-        binding.btnSetWallpaper.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            Toast.makeText(this, "Configuration saved! Press 'Update' to apply to Lockscreen.", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnReset.setOnClickListener {
-            viewModel.resetSettings()
-        }
-    }
-
-    private fun setupHeatmapGrids() {
-        val dp = resources.displayMetrics.density
-
-        fun createDotDrawable(color: Int): android.graphics.drawable.GradientDrawable {
-            return android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                setColor(color)
-                cornerRadius = 2.5f * dp
-            }
-        }
-
-        fun populateGrid(grid: android.widget.GridLayout, activeColor: Int, lightBgColor: Int) {
-            grid.removeAllViews()
-            grid.rowCount = 7
-            grid.columnCount = 24
-            for (row in 0..6) {
-                for (col in 0..23) {
-                    val dot = View(this).apply {
-                        val params = android.widget.GridLayout.LayoutParams().apply {
-                            width = (9 * dp).toInt()
-                            height = (9 * dp).toInt()
-                            setMargins((1.5f * dp).toInt(), (1.5f * dp).toInt(), (1.5f * dp).toInt(), (1.5f * dp).toInt())
-                        }
-                        layoutParams = params
-                        val isCompleted = (col == 23 && row == 2)
-                        background = createDotDrawable(if (isCompleted) activeColor else lightBgColor)
-                    }
-                    grid.addView(dot)
+        // Theme Selection (Light / Dark Mode)
+        binding.rgThemeMode.setOnCheckedChangeListener { _, checkedId ->
+            if (!isUpdatingUiFromState) {
+                val mode = when (checkedId) {
+                    binding.rbThemeLight.id -> AppCompatDelegate.MODE_NIGHT_NO
+                    binding.rbThemeDark.id -> AppCompatDelegate.MODE_NIGHT_YES
+                    binding.rbThemeSystem.id -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }
+                viewModel.onNightModeChanged(mode)
+                AppCompatDelegate.setDefaultNightMode(mode)
             }
         }
 
-        populateGrid(binding.gridHeatmap1, Color.parseColor("#00E676"), Color.parseColor("#C8E6C9"))
-        populateGrid(binding.gridHeatmap2, Color.parseColor("#0288D1"), Color.parseColor("#B3E5FC"))
+        // Language Selection (Việt / Eng)
+        binding.rgLanguage.setOnCheckedChangeListener { _, checkedId ->
+            if (!isUpdatingUiFromState) {
+                val langCode = when (checkedId) {
+                    binding.rbLangVi.id -> "vi"
+                    binding.rbLangEn.id -> "en"
+                    else -> "vi"
+                }
+                viewModel.onLanguageChanged(langCode)
+                val locales = LocaleListCompat.forLanguageTags(langCode)
+                AppCompatDelegate.setApplicationLocales(locales)
+                recreate()
+            }
+        }
     }
-
-    data class CustomHabitViewGroup(
-        val weekRow: View,
-        val yearRow: View,
-        val checkBtn: View,
-        val flameBadge: View,
-        val streakTv: TextView
-    )
-
-    private val customHabitCardViews = mutableListOf<CustomHabitViewGroup>()
 
     private fun setupInitialDefaultData() {
-        // Default Eisenhower Reminders Data
         binding.tvQ1Content.text = "• Nộp báo cáo đồ án Android\n• Gửi email cho giảng viên"
         binding.tvQ2Content.text = "• Học Jetpack Compose & MVVM\n• Đọc 2 chương sách Lập trình"
         binding.tvQ3Content.text = "• Mua thêm văn phòng phẩm\n• Trả lời tin nhắn nhóm"
         binding.tvQ4Content.text = "• Lướt mạng xã hội quá 30p"
-
-        // Default Habit Streaks
-        binding.tvHabit1Streak.text = "3d"
-        binding.tvHabit2Streak.text = "5d"
-    }
-
-    private fun addNewHabitCard(habitName: String) {
-        val dp = resources.displayMetrics.density
-
-        val card = MaterialCardView(this).apply {
-            radius = 20f * dp
-            setCardBackgroundColor(Color.parseColor("#FFF3E0"))
-            strokeWidth = 0
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins((16 * dp).toInt(), 0, (16 * dp).toInt(), (16 * dp).toInt())
-            }
-            layoutParams = params
-        }
-
-        val outerLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding((16 * dp).toInt(), (16 * dp).toInt(), (16 * dp).toInt(), (16 * dp).toInt())
-        }
-
-        val topRow = RelativeLayout(this)
-
-        val iconTv = TextView(this).apply {
-            id = View.generateViewId()
-            text = "⭐"
-            textSize = 20f
-            gravity = Gravity.CENTER
-            background = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                setColor(Color.parseColor("#FFE0B2"))
-                cornerRadius = 10f * dp
-            }
-            val params = RelativeLayout.LayoutParams((40 * dp).toInt(), (40 * dp).toInt()).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_START)
-                addRule(RelativeLayout.CENTER_VERTICAL)
-            }
-            layoutParams = params
-        }
-
-        val textLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            val params = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.RIGHT_OF, iconTv.id)
-                addRule(RelativeLayout.CENTER_VERTICAL)
-                marginStart = (12 * dp).toInt()
-            }
-            layoutParams = params
-        }
-
-        val titleTv = TextView(this).apply {
-            text = habitName
-            setTextColor(Color.BLACK)
-            textSize = 18f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
-
-        val streakTv = TextView(this).apply {
-            text = "0d"
-            setTextColor(Color.parseColor("#888888"))
-            textSize = 13f
-        }
-
-        textLayout.addView(titleTv)
-        textLayout.addView(streakTv)
-
-        var isDone = false
-        val checkBtn = TextView(this).apply {
-            id = View.generateViewId()
-            text = "✓"
-            textSize = 22f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            gravity = Gravity.CENTER
-            setTextColor(Color.parseColor("#E65100"))
-            background = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                setColor(Color.parseColor("#FFE0B2"))
-                cornerRadius = 10f * dp
-            }
-            val params = RelativeLayout.LayoutParams((44 * dp).toInt(), (44 * dp).toInt()).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_END)
-                addRule(RelativeLayout.CENTER_VERTICAL)
-            }
-            layoutParams = params
-            isClickable = true
-            isFocusable = true
-        }
-
-        val flameBadge = TextView(this).apply {
-            text = "1 🔥"
-            setTextColor(Color.parseColor("#E65100"))
-            textSize = 14f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            background = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                setColor(Color.parseColor("#FFE0B2"))
-                cornerRadius = 8f * dp
-            }
-            setPadding((10 * dp).toInt(), (4 * dp).toInt(), (10 * dp).toInt(), (4 * dp).toInt())
-            val params = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_END)
-                addRule(RelativeLayout.CENTER_VERTICAL)
-            }
-            layoutParams = params
-            visibility = View.GONE
-        }
-
-        topRow.addView(iconTv)
-        topRow.addView(textLayout)
-        topRow.addView(checkBtn)
-        topRow.addView(flameBadge)
-
-        // 1. WEEK VIEW ROW
-        val weekRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = (16 * dp).toInt()
-            }
-            layoutParams = params
-        }
-
-        val dayNames = arrayOf("T2 19", "T3 20", "T4 21", "T5 22", "T6 23", "T7 24", "CN 25")
-        val dayViews = mutableListOf<TextView>()
-
-        for (i in 0..6) {
-            val dayTv = TextView(this).apply {
-                text = dayNames[i]
-                textSize = 10f
-                gravity = Gravity.CENTER
-                val isToday = (i == 2)
-                setTextColor(if (isToday) Color.BLACK else Color.parseColor("#888888"))
-                if (isToday) typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-
-                background = if (isToday) {
-                    ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_habit_dashed_day)
-                } else {
-                    android.graphics.drawable.GradientDrawable().apply {
-                        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                        setColor(Color.parseColor("#FFE0B2"))
-                        cornerRadius = 4f * dp
-                    }
-                }
-
-                val params = LinearLayout.LayoutParams(0, (36 * dp).toInt(), 1f).apply {
-                    if (i < 6) marginEnd = (4 * dp).toInt()
-                }
-                layoutParams = params
-            }
-            dayViews.add(dayTv)
-            weekRow.addView(dayTv)
-        }
-
-        checkBtn.setOnClickListener {
-            isDone = !isDone
-            if (isDone) {
-                streakTv.text = "1d"
-                checkBtn.setBackgroundColor(Color.parseColor("#FF9800"))
-                checkBtn.setTextColor(Color.WHITE)
-
-                dayViews[2].background = android.graphics.drawable.GradientDrawable().apply {
-                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                    setColor(Color.parseColor("#FF9800"))
-                    cornerRadius = 4f * dp
-                }
-                dayViews[2].setTextColor(Color.WHITE)
-
-                Toast.makeText(this@MainActivity, "Đã hoàn thành: $habitName! 🎉", Toast.LENGTH_SHORT).show()
-            } else {
-                streakTv.text = "0d"
-                checkBtn.setBackgroundColor(Color.parseColor("#FFE0B2"))
-                checkBtn.setTextColor(Color.parseColor("#E65100"))
-
-                dayViews[2].background = ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_habit_dashed_day)
-                dayViews[2].setTextColor(Color.BLACK)
-            }
-        }
-
-        // 2. YEAR VIEW HEATMAP CONTAINER
-        val yearRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            visibility = View.GONE
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = (16 * dp).toInt()
-            }
-            layoutParams = params
-        }
-
-        val mwfLabels = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            val params = LinearLayout.LayoutParams((16 * dp).toInt(), (64 * dp).toInt()).apply {
-                marginEnd = (6 * dp).toInt()
-            }
-            layoutParams = params
-
-            val mLbl = TextView(this@MainActivity).apply {
-                text = "M"
-                setTextColor(Color.parseColor("#888888"))
-                textSize = 10f
-                gravity = Gravity.CENTER
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1f)
-            }
-            val wLbl = TextView(this@MainActivity).apply {
-                text = "W"
-                setTextColor(Color.parseColor("#888888"))
-                textSize = 10f
-                gravity = Gravity.CENTER
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1f)
-            }
-            val fLbl = TextView(this@MainActivity).apply {
-                text = "F"
-                setTextColor(Color.parseColor("#888888"))
-                textSize = 10f
-                gravity = Gravity.CENTER
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1f)
-            }
-            addView(mLbl)
-            addView(wLbl)
-            addView(fLbl)
-        }
-
-        val heatmapGrid = android.widget.GridLayout(this).apply {
-            rowCount = 7
-            columnCount = 24
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-
-        fun populateCustomGrid() {
-            heatmapGrid.removeAllViews()
-            fun createDotDrawable(color: Int) = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                setColor(color)
-                cornerRadius = 2.5f * dp
-            }
-
-            for (row in 0..6) {
-                for (col in 0..23) {
-                    val dot = View(this).apply {
-                        val params = android.widget.GridLayout.LayoutParams().apply {
-                            width = (9 * dp).toInt()
-                            height = (9 * dp).toInt()
-                            setMargins((1.5f * dp).toInt(), (1.5f * dp).toInt(), (1.5f * dp).toInt(), (1.5f * dp).toInt())
-                        }
-                        layoutParams = params
-                        val isCompleted = (col == 23 && row == 2 && isDone)
-                        background = createDotDrawable(if (isCompleted) Color.parseColor("#FF9800") else Color.parseColor("#FFE0B2"))
-                    }
-                    heatmapGrid.addView(dot)
-                }
-            }
-        }
-        populateCustomGrid()
-
-        yearRow.addView(mwfLabels)
-        yearRow.addView(heatmapGrid)
-
-        outerLayout.addView(topRow)
-        outerLayout.addView(weekRow)
-        outerLayout.addView(yearRow)
-        card.addView(outerLayout)
-
-        customHabitCardViews.add(CustomHabitViewGroup(weekRow, yearRow, checkBtn, flameBadge, streakTv))
-
-        binding.llCustomHabitsContainer.addView(card)
     }
 
     private fun openAddEventBottomSheet() {
         try {
-            AddEventDialog(this) {
-                viewModel.refreshCalendarsAndEvents()
+            AddEventDialog(this, initialDate = selectedCalendarDate) {
+                viewModel.refreshCalendarsAndEvents(YearMonth.from(selectedCalendarDate))
             }.show()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -728,12 +231,7 @@ class MainActivity : AppCompatActivity() {
     private fun openAddReminderBottomSheet(quadrant: String) {
         try {
             AddReminderDialog(this, quadrant) { title, selectedQuadrant ->
-                when (selectedQuadrant) {
-                    "Làm ngay" -> binding.tvQ1Content.text = "• $title"
-                    "Lên kế hoạch" -> binding.tvQ2Content.text = "• $title"
-                    "Ủy quyền" -> binding.tvQ3Content.text = "• $title"
-                    "Loại bỏ" -> binding.tvQ4Content.text = "• $title"
-                }
+                viewModel.addReminder(title, selectedQuadrant)
             }.show()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -745,8 +243,7 @@ class MainActivity : AppCompatActivity() {
         binding.pageWallpaper.visibility = if (tabIndex == 0) View.VISIBLE else View.GONE
         binding.pageCalendar.visibility = if (tabIndex == 1) View.VISIBLE else View.GONE
         binding.pageReminders.visibility = if (tabIndex == 2) View.VISIBLE else View.GONE
-        binding.pageHabits.visibility = if (tabIndex == 3) View.VISIBLE else View.GONE
-        binding.pageSettings.visibility = if (tabIndex == 4) View.VISIBLE else View.GONE
+        binding.pageSettings.visibility = if (tabIndex == 3) View.VISIBLE else View.GONE
 
         if (tabIndex == 1) {
             scrollToCurrentHourInCenter()
@@ -765,8 +262,7 @@ class MainActivity : AppCompatActivity() {
         updateNavItem(binding.navItemWallpaper, binding.ivNavWallpaper, binding.tvNavWallpaper, tabIndex == 0)
         updateNavItem(binding.navItemCalendar, binding.ivNavCalendar, binding.tvNavCalendar, tabIndex == 1)
         updateNavItem(binding.navItemReminders, binding.ivNavReminders, binding.tvNavReminders, tabIndex == 2)
-        updateNavItem(binding.navItemHabits, binding.ivNavHabits, binding.tvNavHabits, tabIndex == 3)
-        updateNavItem(binding.navItemSettings, binding.ivNavSettings, binding.tvNavSettings, tabIndex == 4)
+        updateNavItem(binding.navItemSettings, binding.ivNavSettings, binding.tvNavSettings, tabIndex == 3)
     }
 
     private fun observeViewModel() {
@@ -788,36 +284,33 @@ class MainActivity : AppCompatActivity() {
             binding.ivPreview.setImageBitmap(bitmap)
         }
 
-        binding.ivColorPast.setCardBackgroundColor(state.colorPast)
-        binding.ivColorFuture.setCardBackgroundColor(state.colorFuture)
-        binding.ivColorToday.setCardBackgroundColor(state.colorToday)
-        binding.ivColorText.setCardBackgroundColor(state.colorText)
-        binding.ivColorBg.setCardBackgroundColor(if (state.isUsingImage) Color.TRANSPARENT else state.colorBg)
-
-        binding.seekYOffset.value = state.yOffset.coerceIn(binding.seekYOffset.valueFrom, binding.seekYOffset.valueTo)
-        binding.seekScale.value = state.scale.coerceIn(binding.seekScale.valueFrom, binding.seekScale.valueTo)
-
-        binding.switchMondayFirst.isChecked = state.isMondayFirst
-        binding.switchWeekNumbers.isChecked = state.showWeekNumbers
-        binding.switchMinimalist.isChecked = state.isMinimalistEvents
-
-        when (state.layoutStyle) {
-            0 -> binding.rbStandard.isChecked = true
-            1 -> binding.rbSplit.isChecked = true
-            2 -> binding.rbWeekly.isChecked = true
+        // Theme mode
+        when (state.nightMode) {
+            AppCompatDelegate.MODE_NIGHT_NO -> binding.rbThemeLight.isChecked = true
+            AppCompatDelegate.MODE_NIGHT_YES -> binding.rbThemeDark.isChecked = true
+            else -> binding.rbThemeSystem.isChecked = true
         }
 
-        when (state.fontStyle) {
-            0 -> binding.toggleFont.check(binding.btnFontSans.id)
-            1 -> binding.toggleFont.check(binding.btnFontSerif.id)
-            2 -> binding.toggleFont.check(binding.btnFontMono.id)
+        // Language
+        when (state.language) {
+            "en" -> binding.rbLangEn.isChecked = true
+            else -> binding.rbLangVi.isChecked = true
         }
 
-        renderCalendarsList(state.calendars, state.calendarEnabledMap, state.calendarColorMap)
+        // Reminders
+        val q1 = state.reminders.filter { it.priorityQuadrant == "Q1" }
+        val q2 = state.reminders.filter { it.priorityQuadrant == "Q2" }
+        val q3 = state.reminders.filter { it.priorityQuadrant == "Q3" }
+        val q4 = state.reminders.filter { it.priorityQuadrant == "Q4" }
 
-        val currentMonth = java.time.YearMonth.now().monthValue
-        binding.tvCalendarMonthTitle.text = "Tháng $currentMonth"
+        val isVi = state.language == "vi"
+        val noReminderText = if (isVi) "• Chưa có nhắc nhở" else "• No reminders"
+        binding.tvQ1Content.text = if (q1.isEmpty()) noReminderText else q1.joinToString("\n") { "• ${it.title}" }
+        binding.tvQ2Content.text = if (q2.isEmpty()) noReminderText else q2.joinToString("\n") { "• ${it.title}" }
+        binding.tvQ3Content.text = if (q3.isEmpty()) noReminderText else q3.joinToString("\n") { "• ${it.title}" }
+        binding.tvQ4Content.text = if (q4.isEmpty()) noReminderText else q4.joinToString("\n") { "• ${it.title}" }
 
+        updateCalendarWeekStrip(state.events)
         updateTimelineCurrentTimeIndicator()
         renderTimelineEvents(state.events)
 
@@ -827,6 +320,78 @@ class MainActivity : AppCompatActivity() {
         }
 
         isUpdatingUiFromState = false
+    }
+
+    private fun openDatePicker() {
+        val year = selectedCalendarDate.year
+        val month = selectedCalendarDate.monthValue - 1
+        val day = selectedCalendarDate.dayOfMonth
+
+        val dpd = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
+            selectedCalendarDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay)
+            updateCalendarWeekStrip()
+            renderTimelineEvents(viewModel.uiState.value.events)
+        }, year, month, day)
+
+        dpd.show()
+    }
+
+    private fun updateCalendarWeekStrip(eventsMap: Map<Int, List<EventModel>> = viewModel.uiState.value.events) {
+        val firstDayOfWeek = selectedCalendarDate.with(DayOfWeek.MONDAY)
+
+        val isVi = viewModel.uiState.value.language == "vi"
+        val monthPattern = if (isVi) "'Tháng' M, yyyy" else "MMMM yyyy"
+        val monthFormatter = DateTimeFormatter.ofPattern(monthPattern, Locale(viewModel.uiState.value.language))
+        binding.tvCalendarMonthTitle.text = selectedCalendarDate.format(monthFormatter)
+
+        val dayNames = if (isVi) arrayOf("T2", "T3", "T4", "T5", "T6", "T7", "CN")
+                       else arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+
+        val dayCells = arrayOf(
+            Triple(binding.tvCalDayLabel1, binding.tvCalDate1, Triple(binding.dotCal1, binding.calDay1, 0)),
+            Triple(binding.tvCalDayLabel2, binding.tvCalDate2, Triple(binding.dotCal2, binding.calDay2, 1)),
+            Triple(binding.tvCalDayLabel3, binding.tvCalDate3, Triple(binding.dotCal3, binding.calDay3, 2)),
+            Triple(binding.tvCalDayLabel4, binding.tvCalDate4, Triple(binding.dotCal4, binding.calDay4, 3)),
+            Triple(binding.tvCalDayLabel5, binding.tvCalDate5, Triple(binding.dotCal5, binding.calDay5, 4)),
+            Triple(binding.tvCalDayLabel6, binding.tvCalDate6, Triple(binding.dotCal6, binding.calDay6, 5)),
+            Triple(binding.tvCalDayLabel7, binding.tvCalDate7, Triple(binding.dotCal7, binding.calDay7, 6))
+        )
+
+        val today = LocalDate.now()
+
+        for ((labelTv, dateTv, triple) in dayCells) {
+            val (dotView, cellLayout, index) = triple
+            val date = firstDayOfWeek.plusDays(index.toLong())
+
+            labelTv.text = dayNames[index]
+            dateTv.text = date.dayOfMonth.toString()
+
+            val isSelected = (date == selectedCalendarDate)
+            val isToday = (date == today)
+
+            if (isSelected) {
+                dateTv.setBackgroundResource(R.drawable.bg_day_active_circle)
+                dateTv.setTextColor(Color.WHITE)
+                dateTv.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            } else if (isToday) {
+                dateTv.setBackgroundResource(R.drawable.bg_today_outline)
+                dateTv.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
+                dateTv.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            } else {
+                dateTv.background = null
+                dateTv.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
+                dateTv.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+            }
+
+            val dayEvents = eventsMap[date.dayOfMonth]
+            dotView.visibility = if (!dayEvents.isNullOrEmpty()) View.VISIBLE else View.INVISIBLE
+
+            cellLayout.setOnClickListener {
+                selectedCalendarDate = date
+                updateCalendarWeekStrip()
+                renderTimelineEvents(viewModel.uiState.value.events)
+            }
+        }
     }
 
     private var showPastHours = false
@@ -845,17 +410,105 @@ class MainActivity : AppCompatActivity() {
                     0 to binding.rowHour00
                 )
 
-                val activeRow = hourRows[currentHour] ?: binding.rowHour19
-                val rowTop = activeRow.top
+                val targetView = hourRows[currentHour] ?: binding.rowHour12
+                val scrollView = binding.pageCalendar
 
-                val scrollViewHeight = binding.pageCalendar.height
-                val rowHeight = activeRow.height
+                val targetTop = targetView.top
+                val targetHeight = targetView.height
+                val scrollViewHeight = scrollView.height
 
-                val targetScrollY = (rowTop - (scrollViewHeight / 2) + (rowHeight / 2)).coerceAtLeast(0)
+                val scrollToY = targetTop - (scrollViewHeight / 2) + (targetHeight / 2)
 
-                binding.pageCalendar.smoothScrollTo(0, targetScrollY)
+                scrollView.smoothScrollTo(0, scrollToY.coerceAtLeast(0))
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+    }
+
+    private fun renderTimelineEvents(events: Map<Int, List<EventModel>>) {
+        val slots = mapOf(
+            8 to binding.slot08, 9 to binding.slot09, 10 to binding.slot10, 11 to binding.slot11,
+            12 to binding.slot12, 13 to binding.slot13, 14 to binding.slot14, 15 to binding.slot15,
+            16 to binding.slot16, 17 to binding.slot17, 18 to binding.slot18, 19 to binding.slot19,
+            20 to binding.slot20, 21 to binding.slot21, 22 to binding.slot22, 23 to binding.slot23,
+            0 to binding.slot00
+        )
+
+        for (slot in slots.values) {
+            slot.removeAllViews()
+        }
+
+        binding.llCalendarEventsContainer.removeAllViews()
+
+        val selectedDay = selectedCalendarDate.dayOfMonth
+        val dayEvents = events[selectedDay] ?: emptyList()
+
+        val dp = resources.displayMetrics.density
+
+        if (dayEvents.isEmpty()) {
+            val isVi = viewModel.uiState.value.language == "vi"
+            val emptyTv = TextView(this).apply {
+                text = if (isVi) "• Chưa có sự kiện cho ngày $selectedCalendarDate" else "• No events scheduled for $selectedCalendarDate"
+                setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+                textSize = 14f
+                setPadding(0, 16, 0, 16)
+            }
+            binding.llCalendarEventsContainer.addView(emptyTv)
+        } else {
+            for (evt in dayEvents) {
+                val cal = Calendar.getInstance().apply { timeInMillis = evt.begin }
+                val hour = cal.get(Calendar.HOUR_OF_DAY)
+
+                fun createCard(): MaterialCardView {
+                    val card = MaterialCardView(this).apply {
+                        radius = 12f * dp
+                        setCardBackgroundColor(if (evt.color != 0) evt.color else Color.parseColor("#2196F3"))
+                        strokeWidth = 0
+                        val params = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            setMargins(0, (4 * dp).toInt(), 0, (4 * dp).toInt())
+                        }
+                        layoutParams = params
+                    }
+
+                    val layout = LinearLayout(this).apply {
+                        orientation = LinearLayout.VERTICAL
+                        setPadding((12 * dp).toInt(), (8 * dp).toInt(), (12 * dp).toInt(), (8 * dp).toInt())
+                    }
+
+                    val titleTv = TextView(this).apply {
+                        text = evt.title
+                        setTextColor(Color.WHITE)
+                        textSize = 14f
+                        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                    }
+
+                    val timeStr = if (evt.allDay) "Cả ngày" else {
+                        val endCal = Calendar.getInstance().apply { timeInMillis = evt.end }
+                        String.format(Locale.getDefault(), "%02d:%02d - %02d:%02d", hour, cal.get(Calendar.MINUTE), endCal.get(Calendar.HOUR_OF_DAY), endCal.get(Calendar.MINUTE))
+                    }
+
+                    val timeTv = TextView(this).apply {
+                        text = timeStr
+                        setTextColor(Color.parseColor("#E0E0E0"))
+                        textSize = 12f
+                    }
+
+                    layout.addView(titleTv)
+                    layout.addView(timeTv)
+                    card.addView(layout)
+                    return card
+                }
+
+                binding.llCalendarEventsContainer.addView(createCard())
+
+                val targetSlot = slots[hour]
+                if (targetSlot != null) {
+                    targetSlot.addView(createCard())
+                }
             }
         }
     }
@@ -907,12 +560,13 @@ class MainActivity : AppCompatActivity() {
 
             for ((hour, container) in hourContainers) {
                 val hasEvents = (slots[hour]?.childCount ?: 0) > 0
-                if (!showPastHours && hour < currentHour && !hasEvents) {
+                if (!showPastHours && hour < currentHour && hour != currentHour && !hasEvents) {
                     container.visibility = View.GONE
                 } else {
                     container.visibility = View.VISIBLE
                 }
             }
+            hourContainers[currentHour]?.visibility = View.VISIBLE
 
             val activeRow = hourRows[currentHour] ?: binding.rowHour19
             val tv = hourTvs[currentHour] ?: binding.t19
@@ -937,159 +591,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun renderCalendarsList(
-        calendars: List<CalendarModel>,
-        enabledMap: Map<Long, Boolean>,
-        colorMap: Map<Long, Int>
-    ) {
-        binding.llCalendarsContainer.removeAllViews()
-        if (calendars.isEmpty()) {
-            val tv = TextView(this).apply {
-                text = "No calendars found."
-                setTextColor(Color.GRAY)
-            }
-            binding.llCalendarsContainer.addView(tv)
-            return
-        }
-
-        for (cal in calendars) {
-            val row = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(0, 16, 0, 16)
-                gravity = Gravity.CENTER_VERTICAL
-            }
-
-            val cb = CheckBox(this).apply {
-                text = "${cal.displayName}\n(${cal.accountName})"
-                setTextColor(Color.WHITE)
-                buttonTintList = ColorStateList.valueOf(Color.parseColor("#2196F3"))
-                isChecked = enabledMap[cal.id] ?: true
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (!isUpdatingUiFromState) {
-                        viewModel.onCalendarToggleChanged(cal.id, isChecked)
-                    }
-                }
-            }
-
-            val calColor = colorMap[cal.id] ?: Color.parseColor("#00BCD4")
-            val colorView = MaterialCardView(this).apply {
-                radius = 32f
-                setCardBackgroundColor(calColor)
-                val params = LinearLayout.LayoutParams(64, 64).apply { marginEnd = 16 }
-                layoutParams = params
-                setOnClickListener {
-                    ColorPickerDialog.show(this@MainActivity, "Pick color for ${cal.displayName}", calColor) { color ->
-                        viewModel.onCalendarColorChanged(cal.id, color)
-                    }
-                }
-            }
-
-            row.addView(cb, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-            row.addView(colorView)
-            binding.llCalendarsContainer.addView(row)
-        }
-    }
-
-    private fun renderTimelineEvents(eventsMap: Map<Int, List<edu.hcmute.duan.data.model.EventModel>>) {
-        binding.llCalendarEventsContainer.removeAllViews()
-
-        val slots = mapOf(
-            8 to binding.slot08, 9 to binding.slot09, 10 to binding.slot10, 11 to binding.slot11,
-            12 to binding.slot12, 13 to binding.slot13, 14 to binding.slot14, 15 to binding.slot15,
-            16 to binding.slot16, 17 to binding.slot17, 18 to binding.slot18, 19 to binding.slot19,
-            20 to binding.slot20, 21 to binding.slot21, 22 to binding.slot22, 23 to binding.slot23,
-            0 to binding.slot00
-        )
-
-        for (slot in slots.values) {
-            slot.removeAllViews()
-        }
-
-        val todayDay = java.time.LocalDate.now().dayOfMonth
-        val todayEvents = eventsMap[todayDay] ?: emptyList()
-
-        if (todayEvents.isEmpty()) {
-            val emptyTv = TextView(this).apply {
-                text = "Hôm nay chưa có sự kiện nào. Bấm + để thêm!"
-                setTextColor(Color.parseColor("#888888"))
-                textSize = 14f
-                setPadding(0, 8, 0, 8)
-            }
-            binding.llCalendarEventsContainer.addView(emptyTv)
-            return
-        }
-
-        val timeFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
-        val cal = Calendar.getInstance()
-
-        for (event in todayEvents) {
-            cal.timeInMillis = event.begin
-            val startHour = cal.get(Calendar.HOUR_OF_DAY)
-
-            val card = MaterialCardView(this).apply {
-                radius = 28f
-                setCardBackgroundColor(event.color)
-                strokeWidth = 0
-                val params = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    topMargin = 4
-                    bottomMargin = 8
-                }
-                layoutParams = params
-            }
-
-            val container = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(24, 18, 24, 18)
-            }
-
-            val titleTv = TextView(this).apply {
-                text = event.title
-                setTextColor(Color.WHITE)
-                textSize = 16f
-                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            }
-
-            val timeStr = if (event.allDay) "🕒 Cả ngày" else "🕒 ${timeFormat.format(java.util.Date(event.begin))} - ${timeFormat.format(java.util.Date(event.end))}"
-            val timeTv = TextView(this).apply {
-                text = timeStr
-                setTextColor(Color.parseColor("#F0F0F0"))
-                textSize = 13f
-                setPadding(0, 4, 0, 0)
-            }
-
-            container.addView(titleTv)
-            container.addView(timeTv)
-            card.addView(container)
-
-            card.isClickable = true
-            card.isFocusable = true
-            card.setOnClickListener {
-                AddEventDialog(this, event) {
-                    viewModel.refreshCalendarsAndEvents()
-                }.show()
-            }
-
-            val targetSlot = slots[startHour]
-            if (targetSlot != null) {
-                targetSlot.addView(card)
-            } else {
-                binding.llCalendarEventsContainer.addView(card)
-            }
-        }
-    }
+    private var pendingPermissionCallback: (() -> Unit)? = null
 
     private val requestCalendarPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val readGranted = permissions[Manifest.permission.READ_CALENDAR] ?: false
             if (readGranted) {
                 Toast.makeText(this, "Đã cấp quyền! Đang đồng bộ lịch từ điện thoại...", Toast.LENGTH_SHORT).show()
-                viewModel.loadInitialData()
             } else {
-                Toast.makeText(this, "Vui lòng cấp quyền Lịch trong Cài đặt máy để lấy các sự kiện của bạn", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Sử dụng chế độ Lịch cá nhân cục bộ", Toast.LENGTH_SHORT).show()
             }
+            pendingPermissionCallback?.invoke()
+            pendingPermissionCallback = null
+            viewModel.loadInitialData()
         }
 
     private fun checkAndRequestCalendarPermissions(onGranted: () -> Unit) {
@@ -1103,6 +617,7 @@ class MainActivity : AppCompatActivity() {
         if (permissions.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
             onGranted()
         } else {
+            pendingPermissionCallback = onGranted
             requestCalendarPermissionLauncher.launch(permissions.toTypedArray())
         }
     }

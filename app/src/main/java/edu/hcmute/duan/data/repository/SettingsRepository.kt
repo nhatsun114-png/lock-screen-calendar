@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
+import androidx.appcompat.app.AppCompatDelegate
 import java.io.File
 import java.io.FileOutputStream
 
@@ -30,6 +31,16 @@ class SettingsRepository(private val context: Context) {
 
     fun getLayoutStyle(): Int = sharedPrefs.getInt("layoutStyle", 0)
     fun getFontStyle(): Int = sharedPrefs.getInt("fontStyle", 0)
+
+    fun getLanguage(): String = sharedPrefs.getString("appLanguage", "vi") ?: "vi"
+    fun setLanguage(langCode: String) {
+        sharedPrefs.edit().putString("appLanguage", langCode).apply()
+    }
+
+    fun getNightMode(): Int = sharedPrefs.getInt("nightMode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    fun setNightMode(mode: Int) {
+        sharedPrefs.edit().putInt("nightMode", mode).apply()
+    }
 
     fun isCalendarEnabled(calId: Long): Boolean =
         sharedPrefs.getBoolean("cal_enabled_$calId", true)
@@ -77,21 +88,33 @@ class SettingsRepository(private val context: Context) {
         }.apply()
     }
 
-    fun saveCustomImage(uri: Uri, screenWidth: Int): Boolean {
+    fun saveCustomImage(uri: Uri, targetWidth: Int, targetHeight: Int): Boolean {
         return try {
             val inputStream = context.contentResolver.openInputStream(uri) ?: return false
-            val bitmap = BitmapFactory.decodeStream(inputStream) ?: return false
+            val original = BitmapFactory.decodeStream(inputStream) ?: return false
 
-            val scaledBitmap = Bitmap.createScaledBitmap(
-                bitmap,
-                screenWidth,
-                (bitmap.height * (screenWidth.toFloat() / bitmap.width)).toInt(),
-                true
+            val width = if (targetWidth > 0) targetWidth else 1080
+            val height = if (targetHeight > 0) targetHeight else 1920
+
+            val scale = maxOf(width.toFloat() / original.width, height.toFloat() / original.height)
+            val scaledW = (original.width * scale).toInt()
+            val scaledH = (original.height * scale).toInt()
+
+            val resized = Bitmap.createScaledBitmap(original, scaledW, scaledH, true)
+
+            val x = (scaledW - width) / 2
+            val y = (scaledH - height) / 2
+            val cropped = Bitmap.createBitmap(
+                resized,
+                maxOf(0, x),
+                maxOf(0, y),
+                minOf(width, resized.width - maxOf(0, x)),
+                minOf(height, resized.height - maxOf(0, y))
             )
 
             val file = File(context.filesDir, "custom_bg.jpg")
             val outputStream = FileOutputStream(file)
-            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+            cropped.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
 
             outputStream.flush()
             outputStream.close()
