@@ -63,6 +63,8 @@ class AddEventDialog(
             binding.tvEndTime.setOnClickListener { showTimePicker(false) }
 
             binding.tvSelectCalendarName.setOnClickListener { showCalendarSelectionDialog() }
+            binding.tvReminderTime.setOnClickListener { showReminderSelectionDialog() }
+            binding.tvRepeatOptions.setOnClickListener { showRepeatSelectionDialog() }
 
             binding.btnSelectColor.setOnClickListener {
                 try {
@@ -171,6 +173,51 @@ class AddEventDialog(
         }
     }
 
+    private var selectedReminderOption: String = "Tại thời điểm diễn ra"
+
+    private fun showReminderSelectionDialog() {
+        try {
+            val options = arrayOf(
+                "Không",
+                "Tại thời điểm diễn ra",
+                "Trước 5 phút",
+                "Trước 15 phút",
+                "Trước 30 phút",
+                "Trước 1 giờ",
+                "Trước 1 ngày"
+            )
+            MaterialAlertDialogBuilder(context)
+                .setTitle("Nhắc nhở")
+                .setItems(options) { _, which ->
+                    selectedReminderOption = options[which]
+                    binding.tvReminderTime.text = "${options[which]} ↕"
+                }
+                .show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun showRepeatSelectionDialog() {
+        try {
+            val options = arrayOf(
+                "Không",
+                "Hàng ngày",
+                "Hàng tuần",
+                "Hàng tháng",
+                "Hàng năm"
+            )
+            MaterialAlertDialogBuilder(context)
+                .setTitle("Lặp lại")
+                .setItems(options) { _, which ->
+                    binding.tvRepeatOptions.text = "${options[which]} ↕"
+                }
+                .show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun saveEvent() {
         try {
             val title = binding.etEventTitle.text.toString().trim()
@@ -189,11 +236,39 @@ class AddEventDialog(
                 endMillis = endCalendar.timeInMillis,
                 allDay = isAllDay,
                 calendarId = selectedCalendarId,
+                color = selectedColor,
                 location = if (location.isNotEmpty()) location else null,
                 notes = if (notes.isNotEmpty()) notes else null
             )
 
-            Toast.makeText(context, "Đã thêm sự kiện mới!", Toast.LENGTH_SHORT).show()
+            // Schedule exact AlarmManager alarm based on selected reminder time offset
+            try {
+                val reminderOffsetMillis = when (selectedReminderOption) {
+                    "Trước 5 phút" -> 5 * 60 * 1000L
+                    "Trước 15 phút" -> 15 * 60 * 1000L
+                    "Trước 30 phút" -> 30 * 60 * 1000L
+                    "Trước 1 giờ" -> 60 * 60 * 1000L
+                    "Trước 1 ngày" -> 24 * 60 * 60 * 1000L
+                    else -> 0L
+                }
+
+                val triggerTimeMillis = (startCalendar.timeInMillis - reminderOffsetMillis).coerceAtLeast(System.currentTimeMillis() + 1000L)
+                val alarmScheduler = edu.hcmute.duan.receiver.AlarmScheduler(context)
+                val notificationId = (triggerTimeMillis / 1000).toInt()
+                val timeText = timeFormat.format(startCalendar.time)
+                val eventLabel = if (reminderOffsetMillis > 0) "$title ($selectedReminderOption)" else title
+
+                alarmScheduler.scheduleExactAlarm(
+                    notificationId = notificationId,
+                    eventTitle = eventLabel,
+                    eventTimeText = timeText,
+                    triggerAtMillis = triggerTimeMillis
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            Toast.makeText(context, "Đã thêm sự kiện & đặt báo thức nhắc hẹn!", Toast.LENGTH_SHORT).show()
             onEventAdded()
             dialog.dismiss()
         } catch (e: Exception) {

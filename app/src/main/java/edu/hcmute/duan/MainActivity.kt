@@ -6,7 +6,10 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import java.util.Calendar
+import java.util.Locale
 import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.View
@@ -14,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -247,6 +251,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnTogglePastHours.setOnClickListener {
+            showPastHours = !showPastHours
+            updateTimelineCurrentTimeIndicator()
+            binding.btnTogglePastHours.text = if (showPastHours) "∧" else "∨"
+            val msg = if (showPastHours) "Đã hiện toàn bộ các giờ đã qua" else "Đã ẩn các giờ đã qua"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
+
         binding.rowColorPast.setOnClickListener {
             ColorPickerDialog.show(this, "Past Day Color", viewModel.uiState.value.colorPast) {
                 viewModel.onColorPastChanged(it)
@@ -426,6 +438,10 @@ class MainActivity : AppCompatActivity() {
         binding.pageHabits.visibility = if (tabIndex == 3) View.VISIBLE else View.GONE
         binding.pageSettings.visibility = if (tabIndex == 4) View.VISIBLE else View.GONE
 
+        if (tabIndex == 1) {
+            scrollToCurrentHourInCenter()
+        }
+
         val activeColor = Color.parseColor("#2196F3")
         val inactiveColor = Color.parseColor("#666666")
 
@@ -492,12 +508,123 @@ class MainActivity : AppCompatActivity() {
         val currentMonth = java.time.YearMonth.now().monthValue
         binding.tvCalendarMonthTitle.text = "Tháng $currentMonth"
 
+        updateTimelineCurrentTimeIndicator()
+        renderTimelineEvents(state.events)
+
         state.userMessage?.let { message ->
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
             viewModel.userMessageShown()
         }
 
         isUpdatingUiFromState = false
+    }
+
+    private var showPastHours = false
+
+    private fun scrollToCurrentHourInCenter() {
+        binding.pageCalendar.post {
+            try {
+                val now = Calendar.getInstance()
+                val currentHour = now.get(Calendar.HOUR_OF_DAY)
+
+                val hourRows = mapOf(
+                    8 to binding.rowHour08, 9 to binding.rowHour09, 10 to binding.rowHour10, 11 to binding.rowHour11,
+                    12 to binding.rowHour12, 13 to binding.rowHour13, 14 to binding.rowHour14, 15 to binding.rowHour15,
+                    16 to binding.rowHour16, 17 to binding.rowHour17, 18 to binding.rowHour18, 19 to binding.rowHour19,
+                    20 to binding.rowHour20, 21 to binding.rowHour21, 22 to binding.rowHour22, 23 to binding.rowHour23,
+                    0 to binding.rowHour00
+                )
+
+                val activeRow = hourRows[currentHour] ?: binding.rowHour19
+                val rowTop = activeRow.top
+
+                val scrollViewHeight = binding.pageCalendar.height
+                val rowHeight = activeRow.height
+
+                val targetScrollY = (rowTop - (scrollViewHeight / 2) + (rowHeight / 2)).coerceAtLeast(0)
+
+                binding.pageCalendar.smoothScrollTo(0, targetScrollY)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun updateTimelineCurrentTimeIndicator() {
+        try {
+            val now = Calendar.getInstance()
+            val currentHour = now.get(Calendar.HOUR_OF_DAY)
+            val currentMinute = now.get(Calendar.MINUTE)
+
+            val hourContainers = mapOf(
+                8 to binding.hourContainer08, 9 to binding.hourContainer09, 10 to binding.hourContainer10, 11 to binding.hourContainer11,
+                12 to binding.hourContainer12, 13 to binding.hourContainer13, 14 to binding.hourContainer14, 15 to binding.hourContainer15,
+                16 to binding.hourContainer16, 17 to binding.hourContainer17, 18 to binding.hourContainer18, 19 to binding.hourContainer19,
+                20 to binding.hourContainer20, 21 to binding.hourContainer21, 22 to binding.hourContainer22, 23 to binding.hourContainer23,
+                0 to binding.hourContainer00
+            )
+
+            val hourRows = mapOf(
+                8 to binding.rowHour08, 9 to binding.rowHour09, 10 to binding.rowHour10, 11 to binding.rowHour11,
+                12 to binding.rowHour12, 13 to binding.rowHour13, 14 to binding.rowHour14, 15 to binding.rowHour15,
+                16 to binding.rowHour16, 17 to binding.rowHour17, 18 to binding.rowHour18, 19 to binding.rowHour19,
+                20 to binding.rowHour20, 21 to binding.rowHour21, 22 to binding.rowHour22, 23 to binding.rowHour23,
+                0 to binding.rowHour00
+            )
+
+            val hourTvs = mapOf(
+                8 to binding.t08, 9 to binding.t09, 10 to binding.t10, 11 to binding.t11,
+                12 to binding.t12, 13 to binding.t13, 14 to binding.t14, 15 to binding.t15,
+                16 to binding.t16, 17 to binding.t17, 18 to binding.t18, 19 to binding.t19,
+                20 to binding.t20, 21 to binding.t21, 22 to binding.t22, 23 to binding.t23,
+                0 to binding.t00
+            )
+
+            val slots = mapOf(
+                8 to binding.slot08, 9 to binding.slot09, 10 to binding.slot10, 11 to binding.slot11,
+                12 to binding.slot12, 13 to binding.slot13, 14 to binding.slot14, 15 to binding.slot15,
+                16 to binding.slot16, 17 to binding.slot17, 18 to binding.slot18, 19 to binding.slot19,
+                20 to binding.slot20, 21 to binding.slot21, 22 to binding.slot22, 23 to binding.slot23,
+                0 to binding.slot00
+            )
+
+            for ((hour, tv) in hourTvs) {
+                val formattedHour = String.format(Locale.getDefault(), "%02d:00", hour)
+                tv.text = formattedHour
+                tv.setTextColor(Color.parseColor("#A0A0A0"))
+                tv.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+            }
+
+            for ((hour, container) in hourContainers) {
+                val hasEvents = (slots[hour]?.childCount ?: 0) > 0
+                if (!showPastHours && hour < currentHour && !hasEvents) {
+                    container.visibility = View.GONE
+                } else {
+                    container.visibility = View.VISIBLE
+                }
+            }
+
+            val activeRow = hourRows[currentHour] ?: binding.rowHour19
+            val tv = hourTvs[currentHour] ?: binding.t19
+
+            (binding.currentTimeIndicatorLayout.parent as? ViewGroup)?.removeView(binding.currentTimeIndicatorLayout)
+
+            val dp = resources.displayMetrics.density
+            val minuteOffsetPx = ((currentMinute / 60.0) * (48 * dp)).toInt()
+
+            val params = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                (12 * dp).toInt()
+            ).apply {
+                addRule(RelativeLayout.RIGHT_OF, tv.id)
+                topMargin = minuteOffsetPx
+            }
+
+            activeRow.addView(binding.currentTimeIndicatorLayout, params)
+            binding.currentTimeIndicatorLayout.visibility = View.VISIBLE
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun renderCalendarsList(
@@ -553,6 +680,89 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun renderTimelineEvents(eventsMap: Map<Int, List<edu.hcmute.duan.data.model.EventModel>>) {
+        binding.llCalendarEventsContainer.removeAllViews()
+
+        val slots = mapOf(
+            8 to binding.slot08, 9 to binding.slot09, 10 to binding.slot10, 11 to binding.slot11,
+            12 to binding.slot12, 13 to binding.slot13, 14 to binding.slot14, 15 to binding.slot15,
+            16 to binding.slot16, 17 to binding.slot17, 18 to binding.slot18, 19 to binding.slot19,
+            20 to binding.slot20, 21 to binding.slot21, 22 to binding.slot22, 23 to binding.slot23,
+            0 to binding.slot00
+        )
+
+        for (slot in slots.values) {
+            slot.removeAllViews()
+        }
+
+        val todayDay = java.time.LocalDate.now().dayOfMonth
+        val todayEvents = eventsMap[todayDay] ?: emptyList()
+
+        if (todayEvents.isEmpty()) {
+            val emptyTv = TextView(this).apply {
+                text = "Hôm nay chưa có sự kiện nào. Bấm + để thêm!"
+                setTextColor(Color.parseColor("#888888"))
+                textSize = 14f
+                setPadding(0, 8, 0, 8)
+            }
+            binding.llCalendarEventsContainer.addView(emptyTv)
+            return
+        }
+
+        val timeFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+        val cal = Calendar.getInstance()
+
+        for (event in todayEvents) {
+            cal.timeInMillis = event.begin
+            val startHour = cal.get(Calendar.HOUR_OF_DAY)
+
+            val card = MaterialCardView(this).apply {
+                radius = 28f
+                setCardBackgroundColor(event.color)
+                strokeWidth = 0
+                val params = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    topMargin = 4
+                    bottomMargin = 8
+                }
+                layoutParams = params
+            }
+
+            val container = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(24, 18, 24, 18)
+            }
+
+            val titleTv = TextView(this).apply {
+                text = event.title
+                setTextColor(Color.WHITE)
+                textSize = 16f
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            }
+
+            val timeStr = if (event.allDay) "🕒 Cả ngày" else "🕒 ${timeFormat.format(java.util.Date(event.begin))} - ${timeFormat.format(java.util.Date(event.end))}"
+            val timeTv = TextView(this).apply {
+                text = timeStr
+                setTextColor(Color.parseColor("#F0F0F0"))
+                textSize = 13f
+                setPadding(0, 4, 0, 0)
+            }
+
+            container.addView(titleTv)
+            container.addView(timeTv)
+            card.addView(container)
+
+            val targetSlot = slots[startHour]
+            if (targetSlot != null) {
+                targetSlot.addView(card)
+            } else {
+                binding.llCalendarEventsContainer.addView(card)
+            }
+        }
+    }
+
     private val requestCalendarPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val readGranted = permissions[Manifest.permission.READ_CALENDAR] ?: false
@@ -565,14 +775,17 @@ class MainActivity : AppCompatActivity() {
         }
 
     private fun checkAndRequestCalendarPermissions(onGranted: () -> Unit) {
-        val permissions = arrayOf(
+        val permissions = mutableListOf(
             Manifest.permission.READ_CALENDAR,
             Manifest.permission.WRITE_CALENDAR
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
         if (permissions.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
             onGranted()
         } else {
-            requestCalendarPermissionLauncher.launch(permissions)
+            requestCalendarPermissionLauncher.launch(permissions.toTypedArray())
         }
     }
 

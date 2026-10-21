@@ -266,30 +266,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:background="#EAECEE"
-                            android:padding="4dp"
-                            android:gravity="center_vertical"
-                            android:layout_alignParentStart="true">
-
-                            <ImageView
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:src="@drawable/ic_nav_reminders"
-                                android:padding="4dp"
-                                app:tint="#000000"/>
-
-                            <ImageView
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:src="@drawable/ic_nav_calendar"
-                                android:padding="4dp"
-                                app:tint="#888888"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
                             android:gravity="center_vertical"
                             android:layout_alignParentEnd="true">
 
@@ -343,6 +319,16 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"/>
                     </RelativeLayout>
+
+                    <!-- DYNAMIC EVENTS CONTAINER FOR CALENDAR PAGE -->
+                    <LinearLayout
+                        android:id="@+id/llCalendarEventsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="20dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="8dp"/>
 
                     <!-- WEEKDAY + DATES ROW -->
                     <LinearLayout
@@ -403,82 +389,201 @@
                         </LinearLayout>
 
                         <TextView
+                            android:id="@+id/btnTogglePastHours"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="∨"
                             android:textColor="#888888"
-                            android:textSize="16sp"
+                            android:textSize="18sp"
+                            android:padding="8dp"
                             android:layout_gravity="center_horizontal"
-                            android:layout_marginTop="8dp"/>
+                            android:clickable="true"
+                            android:focusable="true"/>
                     </LinearLayout>
 
-                    <!-- TIMELINE GRID (14:00 - 23:00) -->
+                    <!-- TIMELINE GRID (08:00 - 00:00) -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:paddingTop="16dp">
+                        android:paddingTop="12dp">
+
+                        <!-- DYNAMIC CURRENT TIME INDICATOR OVERLAY -->
+                        <RelativeLayout
+                            android:id="@+id/currentTimeIndicatorLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone">
+
+                            <View
+                                android:id="@+id/currentTimeDot"
+                                android:layout_width="8dp"
+                                android:layout_height="8dp"
+                                android:background="@drawable/bg_day_active_circle"
+                                app:tint="#000000"
+                                android:layout_centerVertical="true"/>
+
+                            <View
+                                android:id="@+id/currentTimeLine"
+                                android:layout_width="match_parent"
+                                android:layout_height="1.5dp"
+                                android:background="#000000"
+                                android:layout_toEndOf="@id/currentTimeDot"
+                                android:layout_centerVertical="true"/>
+                        </RelativeLayout>
+
+                        <!-- 08:00 -->
+                        <LinearLayout android:id="@+id/hourContainer08" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour08" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t08" android:layout_width="55dp" android:layout_height="wrap_content" android:text="08:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line08" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t08" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot08" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
+
+                        <!-- 09:00 -->
+                        <LinearLayout android:id="@+id/hourContainer09" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour09" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t09" android:layout_width="55dp" android:layout_height="wrap_content" android:text="09:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line09" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t09" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot09" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
+
+                        <!-- 10:00 -->
+                        <LinearLayout android:id="@+id/hourContainer10" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour10" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t10" android:layout_width="55dp" android:layout_height="wrap_content" android:text="10:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line10" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t10" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot10" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
+
+                        <!-- 11:00 -->
+                        <LinearLayout android:id="@+id/hourContainer11" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour11" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t11" android:layout_width="55dp" android:layout_height="wrap_content" android:text="11:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line11" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t11" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot11" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
+
+                        <!-- 12:00 -->
+                        <LinearLayout android:id="@+id/hourContainer12" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour12" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t12" android:layout_width="55dp" android:layout_height="wrap_content" android:text="12:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line12" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t12" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot12" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
+
+                        <!-- 13:00 -->
+                        <LinearLayout android:id="@+id/hourContainer13" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour13" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t13" android:layout_width="55dp" android:layout_height="wrap_content" android:text="13:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line13" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t13" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot13" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 14:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t14" android:layout_width="50dp" android:layout_height="wrap_content" android:text="14:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t14" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer14" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour14" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t14" android:layout_width="55dp" android:layout_height="wrap_content" android:text="14:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line14" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t14" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot14" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 15:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t15" android:layout_width="50dp" android:layout_height="wrap_content" android:text="15:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t15" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer15" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour15" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t15" android:layout_width="55dp" android:layout_height="wrap_content" android:text="15:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line15" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t15" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot15" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 16:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t16" android:layout_width="50dp" android:layout_height="wrap_content" android:text="16:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t16" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer16" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour16" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t16" android:layout_width="55dp" android:layout_height="wrap_content" android:text="16:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line16" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t16" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot16" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
-                        <!-- 17:00 (CURRENT TIME INDICATOR) -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t17" android:layout_width="50dp" android:layout_height="wrap_content" android:text="17:00" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" android:paddingStart="16dp"/>
-                            <View android:id="@+id/timeDot" android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/bg_day_active_circle" android:layout_toEndOf="@id/t17" android:layout_centerVertical="true"/>
-                            <View android:layout_width="match_parent" android:layout_height="1.5dp" android:background="#000000" android:layout_toEndOf="@id/timeDot" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <!-- 17:00 -->
+                        <LinearLayout android:id="@+id/hourContainer17" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour17" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t17" android:layout_width="55dp" android:layout_height="wrap_content" android:text="17:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line17" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t17" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot17" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 18:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t18" android:layout_width="50dp" android:layout_height="wrap_content" android:text="18:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t18" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer18" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour18" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t18" android:layout_width="55dp" android:layout_height="wrap_content" android:text="18:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line18" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t18" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot18" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 19:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t19" android:layout_width="50dp" android:layout_height="wrap_content" android:text="19:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t19" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer19" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour19" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t19" android:layout_width="55dp" android:layout_height="wrap_content" android:text="19:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line19" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t19" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot19" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 20:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t20" android:layout_width="50dp" android:layout_height="wrap_content" android:text="20:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t20" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer20" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour20" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t20" android:layout_width="55dp" android:layout_height="wrap_content" android:text="20:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line20" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t20" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot20" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 21:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t21" android:layout_width="50dp" android:layout_height="wrap_content" android:text="21:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t21" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer21" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour21" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t21" android:layout_width="55dp" android:layout_height="wrap_content" android:text="21:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line21" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t21" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot21" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 22:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t22" android:layout_width="50dp" android:layout_height="wrap_content" android:text="22:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t22" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer22" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour22" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t22" android:layout_width="55dp" android:layout_height="wrap_content" android:text="22:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line22" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t22" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot22" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                         <!-- 23:00 -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
-                            <TextView android:id="@+id/t23" android:layout_width="50dp" android:layout_height="wrap_content" android:text="23:00" android:textColor="#A0A0A0" android:textSize="13sp" android:paddingStart="16dp"/>
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t23" android:layout_centerVertical="true"/>
-                        </RelativeLayout>
+                        <LinearLayout android:id="@+id/hourContainer23" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour23" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t23" android:layout_width="55dp" android:layout_height="wrap_content" android:text="23:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line23" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t23" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot23" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
+
+                        <!-- 00:00 -->
+                        <LinearLayout android:id="@+id/hourContainer00" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                            <RelativeLayout android:id="@+id/rowHour00" android:layout_width="match_parent" android:layout_height="48dp">
+                                <TextView android:id="@+id/t00" android:layout_width="55dp" android:layout_height="wrap_content" android:text="00:00" android:textColor="#A0A0A0" android:textSize="13sp" android:singleLine="true" android:paddingStart="12dp" android:layout_centerVertical="true"/>
+                                <View android:id="@+id/line00" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_toEndOf="@id/t00" android:layout_centerVertical="true"/>
+                            </RelativeLayout>
+                            <LinearLayout android:id="@+id/slot00" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="55dp" android:paddingEnd="16dp"/>
+                        </LinearLayout>
 
                     </LinearLayout>
                 </LinearLayout>
@@ -504,30 +609,6 @@
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="20dp"
                         android:paddingTop="16dp">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:background="#EAECEE"
-                            android:padding="4dp"
-                            android:gravity="center_vertical"
-                            android:layout_alignParentStart="true">
-
-                            <ImageView
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:src="@drawable/ic_nav_reminders"
-                                android:padding="4dp"
-                                app:tint="#888888"/>
-
-                            <ImageView
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:src="@drawable/ic_nav_calendar"
-                                android:padding="4dp"
-                                app:tint="#2196F3"/>
-                        </LinearLayout>
 
                         <com.google.android.material.chip.Chip
                             android:layout_width="wrap_content"

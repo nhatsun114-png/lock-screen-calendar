@@ -64,8 +64,23 @@ class AddReminderDialog(
                 return
             }
 
+            // Schedule exact AlarmManager alarm
+            try {
+                val alarmScheduler = edu.hcmute.duan.receiver.AlarmScheduler(context)
+                val notificationId = System.currentTimeMillis().toInt()
+                val triggerTime = System.currentTimeMillis() + 60000L // Remind in 1 minute or at set time
+                alarmScheduler.scheduleExactAlarm(
+                    notificationId = notificationId,
+                    eventTitle = title,
+                    eventTimeText = "Nhắc nhở ($selectedQuadrant)",
+                    triggerAtMillis = triggerTime
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
             onReminderAdded(title, selectedQuadrant)
-            Toast.makeText(context, "Đã lưu nhắc nhở mới vào '$selectedQuadrant'!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Đã lưu nhắc nhở & đặt báo thức!", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         } catch (e: Exception) {
             e.printStackTrace()
