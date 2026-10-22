@@ -16,8 +16,8 @@ interface LocalEventDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertEvent(event: LocalEventEntity): Long
 
-    @Query("DELETE FROM local_events WHERE title = :title AND beginMillis = :begin")
-    fun deleteEventByTitleAndBegin(title: String, begin: Long): Int
+    @Query("DELETE FROM local_events WHERE title = :title")
+    fun deleteEventByTitle(title: String): Int
 
     @Query("UPDATE local_events SET title = :newTitle WHERE title = :oldTitle AND beginMillis = :oldBegin")
     fun updateEventTitle(oldTitle: String, oldBegin: Long, newTitle: String): Int

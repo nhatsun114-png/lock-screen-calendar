@@ -3,12 +3,14 @@ package edu.hcmute.duan.data.repository
 import android.content.ContentValues
 import android.content.Context
 import android.provider.CalendarContract
+import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import edu.hcmute.duan.CalendarHelper
 import edu.hcmute.duan.CalendarUpdateWorker
 import edu.hcmute.duan.data.local.AppDatabase
+import edu.hcmute.duan.data.local.DeletedEventEntity
 import edu.hcmute.duan.data.local.LocalEventEntity
 import edu.hcmute.duan.data.model.CalendarModel
 import edu.hcmute.duan.data.model.EventModel
@@ -19,12 +21,14 @@ import java.util.Calendar
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import org.json.JSONArray
+import java.text.Normalizer
 import java.time.LocalDate
 import java.time.YearMonth
 
 class CalendarRepository(private val context: Context) {
 
     private val localEventDao = AppDatabase.getDatabase(context).localEventDao()
+    private val deletedEventDao = AppDatabase.getDatabase(context).deletedEventDao()
 
     init {
         migrateSharedPreferencesToRoom()
@@ -63,6 +67,11 @@ class CalendarRepository(private val context: Context) {
     }
 
     private fun seedInitialEventsIfEmpty() {
+        val prefs = context.getSharedPreferences("calendar_app_prefs", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("has_seeded_initial_events_v3", false)) {
+            return
+        }
+
         try {
             val existing = localEventDao.getAllEventsSync()
             if (existing.isEmpty()) {
@@ -134,9 +143,15 @@ class CalendarRepository(private val context: Context) {
                     }
                 }
             }
+            prefs.edit().putBoolean("has_seeded_initial_events_v3", true).apply()
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun normalizeTitle(title: String): String {
+        val cleaned = title.replace("\u00A0", " ").trim().lowercase()
+        return Normalizer.normalize(cleaned, Normalizer.Form.NFC)
     }
 
     fun getEventsForMonth(yearMonth: YearMonth = YearMonth.now(), selectedCalIds: Set<String>): Map<Int, List<EventModel>> {
@@ -144,31 +159,51 @@ class CalendarRepository(private val context: Context) {
 
         val eventsMap = mutableMapOf<Int, MutableList<EventModel>>()
 
-        try {
-            val sysEvents = CalendarHelper.getEventsForMonth(context, yearMonth, selectedCalIds)
-            for ((day, list) in sysEvents) {
-                eventsMap[day] = list.toMutableList()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        val deletedTitles = deletedEventDao.getAllDeletedTitlesSync().map { normalizeTitle(it) }.filter { it.isNotEmpty() }.toSet()
+
+        fun isDeleted(title: String): Boolean {
+            val norm = normalizeTitle(title)
+            if (norm.isEmpty()) return false
+            return deletedTitles.contains(norm)
         }
 
+        // 1. Read local events from Room Database
+        val localEvents = loadLocalEvents()
+        val cal = Calendar.getInstance()
+        Log.d("CalendarRepo", "getEventsForMonth yearMonth=$yearMonth, localEventsCount=${localEvents.size}, deletedTitles=$deletedTitles")
+
+        for (evt in localEvents) {
+            Log.d("CalendarRepo", "  localEvt: title='${evt.title}', begin=${evt.begin}, isDeleted=${isDeleted(evt.title)}")
+            if (isDeleted(evt.title)) continue
+
+            cal.timeInMillis = evt.begin
+            val evtYear = cal.get(Calendar.YEAR)
+            val evtMonth = cal.get(Calendar.MONTH) + 1
+            val evtDay = cal.get(Calendar.DAY_OF_MONTH)
+
+            if (evtYear == yearMonth.year && evtMonth == yearMonth.monthValue) {
+                val list = eventsMap[evtDay] ?: mutableListOf()
+                if (list.none { normalizeTitle(it.title) == normalizeTitle(evt.title) }) {
+                    list.add(evt)
+                }
+                eventsMap[evtDay] = list
+            }
+        }
+
+        // 2. Read system calendar events if available (skipping duplicates & deleted)
         try {
-            val localEvents = loadLocalEvents()
-            val cal = Calendar.getInstance()
+            val sysEvents = CalendarHelper.getEventsForMonth(context, yearMonth, selectedCalIds)
+            for ((day, sysList) in sysEvents) {
+                val dayList = eventsMap[day] ?: mutableListOf()
+                for (sysEvt in sysList) {
+                    if (isDeleted(sysEvt.title)) continue
 
-            for (evt in localEvents) {
-                cal.timeInMillis = evt.begin
-                val evtYear = cal.get(Calendar.YEAR)
-                val evtMonth = cal.get(Calendar.MONTH) + 1
-                val evtDay = cal.get(Calendar.DAY_OF_MONTH)
-
-                if (evtYear == yearMonth.year && evtMonth == yearMonth.monthValue) {
-                    val list = eventsMap[evtDay] ?: mutableListOf()
-                    if (list.none { it.title == evt.title && it.begin == evt.begin }) {
-                        list.add(evt)
+                    if (dayList.none { normalizeTitle(it.title) == normalizeTitle(sysEvt.title) }) {
+                        dayList.add(sysEvt)
                     }
-                    eventsMap[evtDay] = list
+                }
+                if (dayList.isNotEmpty()) {
+                    eventsMap[day] = dayList
                 }
             }
         } catch (e: Exception) {
@@ -225,28 +260,36 @@ class CalendarRepository(private val context: Context) {
 
     private fun saveLocalEvent(event: EventModel) {
         try {
-            runBlocking {
-                localEventDao.insertEvent(
-                    LocalEventEntity(
-                        title = event.title,
-                        beginMillis = event.begin,
-                        endMillis = event.end,
-                        allDay = event.allDay,
-                        color = event.color,
-                        calendarId = event.calendarId
-                    )
+            deletedEventDao.removeDeletedTitle(normalizeTitle(event.title))
+            localEventDao.insertEvent(
+                LocalEventEntity(
+                    title = event.title,
+                    beginMillis = event.begin,
+                    endMillis = event.end,
+                    allDay = event.allDay,
+                    color = event.color,
+                    calendarId = event.calendarId
                 )
-            }
+            )
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     fun deleteLocalEvent(eventTitle: String, eventBegin: Long) {
+        val normTitle = normalizeTitle(eventTitle)
         try {
-            runBlocking {
-                localEventDao.deleteEventByTitleAndBegin(eventTitle, eventBegin)
-            }
+            localEventDao.deleteEventByTitle(eventTitle)
+            localEventDao.deleteEventByTitle(normTitle)
+            deletedEventDao.insertDeletedTitle(DeletedEventEntity(normTitle))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        try {
+            val selection = "${CalendarContract.Events.TITLE} = ?"
+            val selectionArgs = arrayOf(eventTitle)
+            context.contentResolver.delete(CalendarContract.Events.CONTENT_URI, selection, selectionArgs)
         } catch (e: Exception) {
             e.printStackTrace()
         }

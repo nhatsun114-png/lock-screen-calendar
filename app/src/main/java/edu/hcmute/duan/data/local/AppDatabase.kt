@@ -6,14 +6,15 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [LocalEventEntity::class, ReminderEntity::class, HabitEntity::class],
-    version = 1,
+    entities = [LocalEventEntity::class, ReminderEntity::class, HabitEntity::class, DeletedEventEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun localEventDao(): LocalEventDao
     abstract fun reminderDao(): ReminderDao
     abstract fun habitDao(): HabitDao
+    abstract fun deletedEventDao(): DeletedEventDao
 
     companion object {
         @Volatile

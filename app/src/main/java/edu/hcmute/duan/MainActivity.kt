@@ -54,6 +54,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import android.app.DatePickerDialog
+import android.widget.Button
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.Calendar
 import java.util.Locale
 
@@ -500,6 +502,13 @@ class MainActivity : AppCompatActivity() {
                     layout.addView(titleTv)
                     layout.addView(timeTv)
                     card.addView(layout)
+
+                    card.isClickable = true
+                    card.isFocusable = true
+                    card.setOnClickListener {
+                        showEventOptionsBottomSheet(evt)
+                    }
+
                     return card
                 }
 
@@ -511,6 +520,36 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun showEventOptionsBottomSheet(event: EventModel) {
+        val isVi = viewModel.uiState.value.language == "vi"
+        val dialog = BottomSheetDialog(this)
+        val sheetView = layoutInflater.inflate(R.layout.bottom_sheet_event_options, null)
+
+        val tvTitle = sheetView.findViewById<TextView>(R.id.tvOptionTitle)
+        val btnEdit = sheetView.findViewById<Button>(R.id.btnOptionEdit)
+        val btnDelete = sheetView.findViewById<Button>(R.id.btnOptionDelete)
+
+        tvTitle.text = event.title
+        btnEdit.text = if (isVi) "✏️ Chỉnh sửa sự kiện" else "✏️ Edit Event"
+        btnDelete.text = if (isVi) "🗑️ Xóa sự kiện" else "🗑️ Delete Event"
+
+        btnEdit.setOnClickListener {
+            dialog.dismiss()
+            AddEventDialog(this, initialDate = selectedCalendarDate, eventToEdit = event) {
+                viewModel.refreshCalendarsAndEvents(YearMonth.from(selectedCalendarDate))
+            }.show()
+        }
+
+        btnDelete.setOnClickListener {
+            dialog.dismiss()
+            viewModel.deleteEvent(event, selectedCalendarDate)
+            Toast.makeText(this, if (isVi) "Đã xóa sự kiện!" else "Event deleted!", Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.setContentView(sheetView)
+        dialog.show()
     }
 
     private fun updateTimelineCurrentTimeIndicator() {

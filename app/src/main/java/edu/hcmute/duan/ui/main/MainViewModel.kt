@@ -10,6 +10,7 @@ import edu.hcmute.duan.CalendarWallpaperRenderer
 import edu.hcmute.duan.data.local.AppDatabase
 import edu.hcmute.duan.data.local.HabitEntity
 import edu.hcmute.duan.data.local.ReminderEntity
+import edu.hcmute.duan.data.model.EventModel
 import edu.hcmute.duan.data.model.WallpaperTheme
 import edu.hcmute.duan.data.repository.CalendarRepository
 import edu.hcmute.duan.data.repository.SettingsRepository
@@ -131,7 +132,43 @@ class MainViewModel(
                     calendars = calendars,
                     calendarEnabledMap = enabledMap,
                     calendarColorMap = colorMap,
-                    events = events
+                    events = HashMap(events),
+                    refreshTrigger = System.currentTimeMillis()
+                )
+                updatePreview()
+            }
+        }
+    }
+
+    fun deleteEvent(event: EventModel, selectedDate: LocalDate) {
+        viewModelScope.launch(Dispatchers.IO) {
+            calendarRepository.deleteLocalEvent(event.title, event.begin)
+            
+            val yearMonth = YearMonth.from(selectedDate)
+            val calendars = calendarRepository.getAvailableCalendars()
+            val enabledMap = mutableMapOf<Long, Boolean>()
+            val colorMap = mutableMapOf<Long, Int>()
+            val selectedCalIds = mutableSetOf<String>()
+
+            for (cal in calendars) {
+                val isEnabled = settingsRepository.isCalendarEnabled(cal.id)
+                val color = settingsRepository.getCalendarColor(cal.id)
+                enabledMap[cal.id] = isEnabled
+                colorMap[cal.id] = color
+                if (isEnabled) {
+                    selectedCalIds.add(cal.id.toString())
+                }
+            }
+
+            val events = calendarRepository.getEventsForMonth(yearMonth, selectedCalIds)
+
+            withContext(Dispatchers.Main) {
+                _uiState.value = _uiState.value.copy(
+                    calendars = calendars,
+                    calendarEnabledMap = enabledMap,
+                    calendarColorMap = colorMap,
+                    events = HashMap(events),
+                    refreshTrigger = System.currentTimeMillis()
                 )
                 updatePreview()
             }

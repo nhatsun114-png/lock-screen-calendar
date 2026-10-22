@@ -32,7 +32,8 @@ data class MainUiState(
     val habits: List<HabitEntity> = emptyList(),
     val previewBitmap: Bitmap? = null,
     val userMessage: String? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val refreshTrigger: Long = 0L
 ) {
     val styleName: String
         get() = when (layoutStyle) {
