@@ -127,8 +127,7 @@ class MainActivity : AppCompatActivity() {
         // Bottom Navigation Bar Items
         binding.navItemWallpaper.setOnClickListener { selectTab(0) }
         binding.navItemCalendar.setOnClickListener { selectTab(1) }
-        binding.navItemReminders.setOnClickListener { selectTab(2) }
-        binding.navItemSettings.setOnClickListener { selectTab(3) }
+        binding.navItemSettings.setOnClickListener { selectTab(2) }
 
         binding.chipGuide.setOnClickListener {
             Toast.makeText(this, "Mở hướng dẫn thiết lập hình nền tự động", Toast.LENGTH_SHORT).show()
@@ -163,12 +162,6 @@ class MainActivity : AppCompatActivity() {
         binding.llMonthHeader.setOnClickListener {
             openDatePicker()
         }
-
-        // Add Reminder buttons in Reminders Eisenhower Matrix page
-        binding.btnAddQ1.setOnClickListener { openAddReminderBottomSheet("Làm ngay") }
-        binding.btnAddQ2.setOnClickListener { openAddReminderBottomSheet("Lên kế hoạch") }
-        binding.btnAddQ3.setOnClickListener { openAddReminderBottomSheet("Ủy quyền") }
-        binding.btnAddQ4.setOnClickListener { openAddReminderBottomSheet("Loại bỏ") }
 
         binding.btnTogglePastHours.setOnClickListener {
             showPastHours = !showPastHours
@@ -213,10 +206,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupInitialDefaultData() {
-        binding.tvQ1Content.text = "• Nộp báo cáo đồ án Android\n• Gửi email cho giảng viên"
-        binding.tvQ2Content.text = "• Học Jetpack Compose & MVVM\n• Đọc 2 chương sách Lập trình"
-        binding.tvQ3Content.text = "• Mua thêm văn phòng phẩm\n• Trả lời tin nhắn nhóm"
-        binding.tvQ4Content.text = "• Lướt mạng xã hội quá 30p"
     }
 
     private fun openAddEventBottomSheet() {
@@ -230,22 +219,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openAddReminderBottomSheet(quadrant: String) {
-        try {
-            AddReminderDialog(this, quadrant) { title, selectedQuadrant ->
-                viewModel.addReminder(title, selectedQuadrant)
-            }.show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Không thể mở màn hình thêm nhắc nhở: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun selectTab(tabIndex: Int) {
         binding.pageWallpaper.visibility = if (tabIndex == 0) View.VISIBLE else View.GONE
         binding.pageCalendar.visibility = if (tabIndex == 1) View.VISIBLE else View.GONE
-        binding.pageReminders.visibility = if (tabIndex == 2) View.VISIBLE else View.GONE
-        binding.pageSettings.visibility = if (tabIndex == 3) View.VISIBLE else View.GONE
+        binding.pageSettings.visibility = if (tabIndex == 2) View.VISIBLE else View.GONE
 
         if (tabIndex == 1) {
             scrollToCurrentHourInCenter()
@@ -263,8 +240,7 @@ class MainActivity : AppCompatActivity() {
 
         updateNavItem(binding.navItemWallpaper, binding.ivNavWallpaper, binding.tvNavWallpaper, tabIndex == 0)
         updateNavItem(binding.navItemCalendar, binding.ivNavCalendar, binding.tvNavCalendar, tabIndex == 1)
-        updateNavItem(binding.navItemReminders, binding.ivNavReminders, binding.tvNavReminders, tabIndex == 2)
-        updateNavItem(binding.navItemSettings, binding.ivNavSettings, binding.tvNavSettings, tabIndex == 3)
+        updateNavItem(binding.navItemSettings, binding.ivNavSettings, binding.tvNavSettings, tabIndex == 2)
     }
 
     private fun observeViewModel() {
@@ -298,19 +274,6 @@ class MainActivity : AppCompatActivity() {
             "en" -> binding.rbLangEn.isChecked = true
             else -> binding.rbLangVi.isChecked = true
         }
-
-        // Reminders
-        val q1 = state.reminders.filter { it.priorityQuadrant == "Q1" }
-        val q2 = state.reminders.filter { it.priorityQuadrant == "Q2" }
-        val q3 = state.reminders.filter { it.priorityQuadrant == "Q3" }
-        val q4 = state.reminders.filter { it.priorityQuadrant == "Q4" }
-
-        val isVi = state.language == "vi"
-        val noReminderText = if (isVi) "• Chưa có nhắc nhở" else "• No reminders"
-        binding.tvQ1Content.text = if (q1.isEmpty()) noReminderText else q1.joinToString("\n") { "• ${it.title}" }
-        binding.tvQ2Content.text = if (q2.isEmpty()) noReminderText else q2.joinToString("\n") { "• ${it.title}" }
-        binding.tvQ3Content.text = if (q3.isEmpty()) noReminderText else q3.joinToString("\n") { "• ${it.title}" }
-        binding.tvQ4Content.text = if (q4.isEmpty()) noReminderText else q4.joinToString("\n") { "• ${it.title}" }
 
         updateCalendarWeekStrip(state.events)
         updateTimelineCurrentTimeIndicator()
