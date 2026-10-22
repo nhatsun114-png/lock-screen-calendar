@@ -134,23 +134,6 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:scaleType="centerCrop" />
-
-                                <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/btnCustomize"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/tab_settings"
-                                    android:layout_gravity="bottom|center_horizontal"
-                                    android:layout_marginBottom="20dp"
-                                    app:cornerRadius="24dp"
-                                    app:backgroundTint="#CCFFFFFF"
-                                    app:strokeColor="#2196F3"
-                                    app:strokeWidth="1dp"
-                                    android:textColor="#2196F3"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold"
-                                    android:paddingHorizontal="28dp"
-                                    android:paddingVertical="10dp" />
                             </FrameLayout>
 
                             <com.google.android.material.button.MaterialButton

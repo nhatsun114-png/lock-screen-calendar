@@ -117,9 +117,6 @@ class MainActivity : AppCompatActivity() {
         binding.ivPreview.setOnClickListener {
             startActivity(Intent(this, CustomizeActivity::class.java))
         }
-        binding.btnCustomize.setOnClickListener {
-            startActivity(Intent(this, CustomizeActivity::class.java))
-        }
         binding.btnOpenCustomize.setOnClickListener {
             startActivity(Intent(this, CustomizeActivity::class.java))
         }
