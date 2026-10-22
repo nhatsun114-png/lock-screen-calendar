@@ -15,6 +15,7 @@ import edu.hcmute.duan.data.model.WallpaperTheme
 import edu.hcmute.duan.data.repository.CalendarRepository
 import edu.hcmute.duan.data.repository.SettingsRepository
 import edu.hcmute.duan.data.repository.WallpaperRepository
+import edu.hcmute.duan.receiver.AlarmScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,9 +55,9 @@ class MainViewModel(
         viewModelScope.launch {
             loadPrefs()
             refreshCalendarsAndEvents()
-            loadReminders()
-            loadHabits()
             calendarRepository.scheduleDailyCalendarUpdate()
+            AlarmScheduler(getApplication()).scheduleMidnightAlarm()
+            applyWallpaperToLockScreen()
         }
     }
 

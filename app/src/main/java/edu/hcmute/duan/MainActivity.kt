@@ -202,6 +202,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        val today = LocalDate.now()
+        if (selectedCalendarDate != today) {
+            selectedCalendarDate = today
+            updateCalendarWeekStrip()
+            renderTimelineEvents(viewModel.uiState.value.events)
+        }
+        viewModel.refreshCalendarsAndEvents(YearMonth.from(selectedCalendarDate))
+    }
+
     private fun setupInitialDefaultData() {
     }
 

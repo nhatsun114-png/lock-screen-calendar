@@ -48,6 +48,17 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".receiver.MidnightReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="edu.hcmute.duan.ACTION_MIDNIGHT_UPDATE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

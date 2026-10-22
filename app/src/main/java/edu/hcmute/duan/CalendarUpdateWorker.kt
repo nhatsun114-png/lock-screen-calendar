@@ -62,13 +62,13 @@ class CalendarUpdateWorker(
                 }
             }
 
-            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val displayMetrics = DisplayMetrics()
-            windowManager.defaultDisplay.getMetrics(displayMetrics)
+            val displayMetrics = context.resources.displayMetrics
+            val width = if (displayMetrics.widthPixels > 0) displayMetrics.widthPixels else 1080
+            val height = if (displayMetrics.heightPixels > 0) displayMetrics.heightPixels else 2400
 
             val theme = WallpaperTheme(
-                width = displayMetrics.widthPixels,
-                height = displayMetrics.heightPixels,
+                width = width,
+                height = height,
                 layoutStyle = layoutStyle,
                 fontStyle = fontStyle,
                 isMondayFirst = isMondayFirst,

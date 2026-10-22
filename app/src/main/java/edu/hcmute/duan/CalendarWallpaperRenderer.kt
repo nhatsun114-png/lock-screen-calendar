@@ -13,6 +13,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
+import java.util.Calendar
 import java.util.Locale
 
 object CalendarWallpaperRenderer {
@@ -48,7 +49,16 @@ object CalendarWallpaperRenderer {
 
         return bitmap
     }
-    
+
+    private fun getTodayLocalDate(): LocalDate {
+        val cal = Calendar.getInstance()
+        return LocalDate.of(
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH) + 1,
+            cal.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
     private fun drawWeeklyAndTasksLayout(
         canvas: Canvas,
         theme: WallpaperTheme,
@@ -56,7 +66,7 @@ object CalendarWallpaperRenderer {
         events: Map<Int, List<EventModel>>
     ) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        val today = LocalDate.now()
+        val today = getTodayLocalDate()
         val yearMonth = YearMonth.of(today.year, today.month)
         
         val baseTextSize = theme.width * 0.04f * (theme.sizeScalePercent / 100f)
@@ -175,8 +185,8 @@ object CalendarWallpaperRenderer {
         events: Map<Int, List<EventModel>>
     ) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        val today = LocalDate.now()
-        val yearMonth = YearMonth.now()
+        val today = getTodayLocalDate()
+        val yearMonth = YearMonth.of(today.year, today.month)
         
         val baseTextSize = theme.width * 0.04f * (theme.sizeScalePercent / 100f)
         val headerTextSize = theme.width * 0.08f * (theme.sizeScalePercent / 100f)

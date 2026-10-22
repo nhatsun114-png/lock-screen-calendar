@@ -21,12 +21,12 @@ class BootReceiver : BroadcastReceiver() {
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    // 1. Reschedule WorkManager
+                    // 1. Reschedule WorkManager & Midnight Alarm
                     val calendarRepository = CalendarRepository(appContext)
                     calendarRepository.scheduleDailyCalendarUpdate()
 
-                    // 2. Restore future alarms from Room Database (TC-CORE-04 fix)
                     val alarmScheduler = AlarmScheduler(appContext)
+                    alarmScheduler.scheduleMidnightAlarm()
                     val now = System.currentTimeMillis()
                     val sdf = SimpleDateFormat("HH:mm, dd/MM", Locale.getDefault())
 
