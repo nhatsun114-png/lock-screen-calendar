@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var isUpdatingUiFromState = false
+    private var currentTab = 0
 
     private val imagePickerLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -99,6 +100,10 @@ class MainActivity : AppCompatActivity() {
 
         initDisplayMetrics()
         setupListeners()
+
+        currentTab = savedInstanceState?.getInt("current_tab") ?: 0
+        selectTab(currentTab)
+
         setupInitialDefaultData()
         observeViewModel()
 
@@ -213,6 +218,11 @@ class MainActivity : AppCompatActivity() {
         viewModel.refreshCalendarsAndEvents(YearMonth.from(selectedCalendarDate))
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("current_tab", currentTab)
+    }
+
     private fun setupInitialDefaultData() {
     }
 
@@ -228,6 +238,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun selectTab(tabIndex: Int) {
+        currentTab = tabIndex
+
         binding.pageWallpaper.visibility = if (tabIndex == 0) View.VISIBLE else View.GONE
         binding.pageCalendar.visibility = if (tabIndex == 1) View.VISIBLE else View.GONE
         binding.pageSettings.visibility = if (tabIndex == 2) View.VISIBLE else View.GONE
